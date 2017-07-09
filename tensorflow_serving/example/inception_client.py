@@ -28,6 +28,7 @@ import tensorflow as tf
 from tensorflow_serving.apis import predict_pb2
 from tensorflow_serving.apis import prediction_service_pb2
 
+import time
 
 tf.app.flags.DEFINE_string('server', 'localhost:9000',
                            'PredictionService host:port')
@@ -48,8 +49,14 @@ def main(_):
     request.model_spec.signature_name = 'predict_images'
     request.inputs['images'].CopyFrom(
         tf.contrib.util.make_tensor_proto(data, shape=[1]))
-    result = stub.Predict(request, 10.0)  # 10 secs timeout
-    print(result)
+    # print(time.time())
+    for i in range(10):
+      start = time.time()
+      result = stub.Predict(request, 10.0)  # 10 secs timeout
+      end = time.time()
+      print("[%s, %s] = %s" % (str(start), str(end), str(end - start)))
+    # print(result)
+    # print(time.time())
 
 
 if __name__ == '__main__':

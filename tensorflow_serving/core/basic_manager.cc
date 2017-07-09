@@ -218,6 +218,9 @@ BasicManager::BasicManager(Env* const env, const uint32 num_load_threads,
     : servable_event_bus_(servable_event_bus),
       env_(env),
       num_load_threads_(num_load_threads) {
+
+  LOG(INFO) << "[Yitao] *** We are in BasicManager::BasicManager() ***";
+
   harness_options_.max_num_load_retries = max_num_load_retries;
   harness_options_.load_retry_interval_micros = load_retry_interval_micros;
   harness_options_.error_callback = [this](const ServableId& id,
@@ -469,6 +472,9 @@ Status BasicManager::ExecuteLoad(LoaderHarness* harness) {
 
 void BasicManager::LoadServable(const ServableId& id,
                                 const DoneCallback done_callback) {
+
+  LOG(INFO) << "[Yitao] *** In BasicManager::LoadServable(), request to load servable " << id << " ***";
+
   VLOG(1) << "Request to load servable " << id;
   LoadOrUnloadRequest request;
   request.kind = LoadOrUnloadRequest::Kind::kLoad;
@@ -509,6 +515,9 @@ Status BasicManager::ExecuteUnload(LoaderHarness* harness) {
 
 void BasicManager::UnloadServable(const ServableId& id,
                                   const DoneCallback done_callback) {
+
+  LOG(INFO) << "[Yitao] In BasicManager::UnloadServable(), request to unload servable " << id << " ***";
+
   VLOG(1) << "Request to unload servable " << id;
   LoadOrUnloadRequest request;
   request.kind = LoadOrUnloadRequest::Kind::kUnload;

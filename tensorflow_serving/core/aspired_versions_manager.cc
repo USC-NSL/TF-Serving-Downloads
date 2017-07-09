@@ -344,6 +344,9 @@ AspiredVersionsManager::GetNextAction() {
 
 void AspiredVersionsManager::PerformAction(
     const AspiredVersionPolicy::ServableAction action) {
+
+  LOG(INFO) << "[Yitao] ****** In AspiredVersionsManager::PerformAction(), we are ready to call LoadServable()/UnloadServable()!!! ******";
+
   switch (action.action) {
     case AspiredVersionPolicy::Action::kLoad: {
       basic_manager_->LoadServable(action.id, [action](const Status& status) {
@@ -413,12 +416,16 @@ void AspiredVersionsManager::HandlePendingAspiredVersionsRequests() {
 void AspiredVersionsManager::InvokePolicyAndExecuteAction() {
   mutex_lock l(basic_manager_read_modify_write_mu_);
 
+  // LOG(INFO) << "[Yitao] *** Duangduangduang!!! ***";
+
   const optional<AspiredVersionPolicy::ServableAction> next_action =
       GetNextAction();
   if (!next_action) {
     return;
   }
   // NOTE: we could do action validation here.
+
+  // LOG(INFO) << "[Yitao] *** Kuangkuangkuang!!! ***";
 
   PerformAction(*next_action);
 }

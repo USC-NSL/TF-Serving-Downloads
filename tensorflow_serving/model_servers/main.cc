@@ -198,10 +198,21 @@ class PredictionServiceImpl final : public PredictionService::Service {
                                  bool use_saved_model)
       : core_(std::move(core)),
         predictor_(new TensorflowPredictor(use_saved_model)),
-        use_saved_model_(use_saved_model) {}
+        use_saved_model_(use_saved_model) {tmp_first_time_ = true;}
 
   grpc::Status Predict(ServerContext* context, const PredictRequest* request,
                        PredictResponse* response) override {
+
+    LOG(INFO) << "[Yitao] *** Predict() is called! ***";
+    
+    if (tmp_first_time_) {
+      LOG(INFO) << "[Yitao] @@@@@@ Temp solution, we begin to ReloadConfig()! @@@@@@";
+      auto model_server_config = ReadProtoFromFile<ModelServerConfig>("tfserv.conf");
+      core_->ReloadConfig(model_server_config);
+      LOG(INFO) << "[Yitao] @@@@@@ Temp solution, we finish to ReloadConfig()! @@@@@@";
+    }
+    tmp_first_time_ = false;
+
     tensorflow::RunOptions run_options = tensorflow::RunOptions();
     // By default, this is infinite which is the same default as RunOptions.
     run_options.set_timeout_in_ms(
@@ -234,6 +245,9 @@ class PredictionServiceImpl final : public PredictionService::Service {
   grpc::Status Classify(ServerContext* context,
                         const ClassificationRequest* request,
                         ClassificationResponse* response) override {
+
+    LOG(INFO) << "[Yitao] *** Classify() is called! ***";
+
     tensorflow::RunOptions run_options = tensorflow::RunOptions();
     // By default, this is infinite which is the same default as RunOptions.
     run_options.set_timeout_in_ms(
@@ -282,6 +296,7 @@ class PredictionServiceImpl final : public PredictionService::Service {
   std::unique_ptr<ServerCore> core_;
   std::unique_ptr<TensorflowPredictor> predictor_;
   bool use_saved_model_;
+  bool tmp_first_time_;
 };
 
 void RunServer(int port, std::unique_ptr<ServerCore> core,
@@ -406,6 +421,12 @@ int main(int argc, char** argv) {
         ReadProtoFromFile<ModelServerConfig>(model_config_file);
   }
 
+  auto tmpModelConfigList = options.model_server_config.mutable_model_config_list()->mutable_config();
+  for (int i = 0; i < tmpModelConfigList->size(); i++) {
+    auto tmpName = tmpModelConfigList->Mutable(i)->mutable_name();
+    LOG(INFO) << "[Yitao] ****** In options.model_server_config, we have the " << i << "th model: " << *tmpName;
+  }
+
   if (platform_config_file.empty()) {
     SessionBundleConfig session_bundle_config;
     // Batching config
@@ -443,7 +464,16 @@ int main(int argc, char** argv) {
 
   std::unique_ptr<ServerCore> core;
   TF_CHECK_OK(ServerCore::Create(std::move(options), &core));
+
+  // auto model_server_config = ReadProtoFromFile<ModelServerConfig>("tfserv.conf");
+  // core->ReloadConfig(model_server_config);
+
   RunServer(port, std::move(core), use_saved_model);
+
+  // LOG(INFO) << "[Yitao] *** Yes, we are here... ***";
+
+  // auto model_server_config = ReadProtoFromFile<ModelServerConfig>("tfserv.conf");
+  // core->ReloadConfig(model_server_config);
 
   return 0;
 }

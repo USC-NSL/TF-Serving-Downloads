@@ -45,6 +45,9 @@ SavedModelBundleSourceAdapter::SavedModelBundleSourceAdapter(
 
 Status SavedModelBundleSourceAdapter::Convert(const StoragePath& path,
                                               std::unique_ptr<Loader>* loader) {
+
+  // LOG(INFO) << "[Yitao] In SavedModelBundleSourceAdapter::Convert(), we are going to call CreateSavedModelBundle()! ***";
+
   std::shared_ptr<SavedModelBundleFactory> bundle_factory = bundle_factory_;
   auto servable_creator = [bundle_factory,
                            path](std::unique_ptr<SavedModelBundle>* bundle) {

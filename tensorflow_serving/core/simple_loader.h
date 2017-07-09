@@ -180,7 +180,11 @@ SimpleLoader<ServableType>::EstimateNoResources() {
 template <typename ServableType>
 SimpleLoader<ServableType>::SimpleLoader(Creator creator,
                                          ResourceEstimator resource_estimator)
-    : creator_(creator), resource_estimator_(resource_estimator) {}
+    : creator_(creator), resource_estimator_(resource_estimator) {
+
+  // LOG(INFO) << "[Yitao] *** SimpleLoader::SimpleLoader() ***";
+
+}
 
 template <typename ServableType>
 Status SimpleLoader<ServableType>::EstimateResources(

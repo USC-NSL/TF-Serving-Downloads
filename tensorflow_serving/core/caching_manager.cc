@@ -156,6 +156,9 @@ Status CachingManager::LoadServable(
 
       Notification load_done;
       Status load_status;
+
+      LOG(INFO) << "[Yitao] ****** In CachingManager::LoadServable(), we are ready to call LoadServable()!!! ******";
+
       basic_manager_->LoadServable(servable_id, [&](const Status& status) {
         load_status = status;
         load_done.Notify();

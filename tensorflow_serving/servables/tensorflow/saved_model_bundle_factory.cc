@@ -76,6 +76,9 @@ Status SavedModelBundleFactory::EstimateResourceRequirement(
 
 Status SavedModelBundleFactory::CreateSavedModelBundle(
     const string& path, std::unique_ptr<SavedModelBundle>* bundle) {
+
+  // LOG(INFO) << "[Yitao] *** In SavedModelBundleFactory::CreateSavedModelBundle(), we are going to call LoadSessionBundleOrSavedModelBundle()! ***";
+
   bundle->reset(new SavedModelBundle);
   TF_RETURN_IF_ERROR(LoadSessionBundleOrSavedModelBundle(
       GetSessionOptions(config_), GetRunOptions(config_), path,

@@ -78,6 +78,9 @@ Status StaticManagerBuilder::AddServable(const ServableId& id,
       .IgnoreError();
   Status load_status;
   Notification load_done;
+
+  LOG(INFO) << "[Yitao] ****** In StaticManagerBuilder::AddServable(), we are ready to call LoadServable()!!! ******";
+
   basic_manager_->LoadServable(id, [&](const Status& status) {
     load_status = status;
     load_done.Notify();

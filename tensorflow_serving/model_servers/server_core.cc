@@ -243,6 +243,9 @@ Status ServerCore::WaitUntilModelsAvailable(const std::set<string>& models,
 }
 
 Status ServerCore::AddModelsViaModelConfigList() {
+
+  LOG(INFO) << "[Yitao] *** In ServerCore::AddModelsViaModelConfigList(), add models via model_config_list! ***";
+
   const bool is_first_config = storage_path_source_and_router_ == nullopt;
 
   // Create/reload the source, source router and source adapters.
@@ -342,6 +345,9 @@ Status ServerCore::MaybeUpdateServerRequestLogger() {
 }
 
 Status ServerCore::ReloadConfig(const ModelServerConfig& new_config) {
+
+  LOG(INFO) << "[Yitao] ****** In ServerCore::ReloadConfig(), we are calling ServerCore::ReloadConfig() ******";
+
   mutex_lock l(config_mu_);
 
   // Determine whether to accept this config transition.
