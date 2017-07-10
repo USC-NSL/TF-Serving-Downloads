@@ -50,9 +50,9 @@ def main(_):
     request.inputs['images'].CopyFrom(
         tf.contrib.util.make_tensor_proto(data, shape=[1]))
     # print(time.time())
-    for i in range(10):
+    for i in range(1):
       start = time.time()
-      result = stub.Predict(request, 10.0)  # 10 secs timeout
+      result = stub.Predict(request, 60.0)  # 10 secs timeout
       end = time.time()
       print("[%s, %s] = %s" % (str(start), str(end), str(end - start)))
     # print(result)
