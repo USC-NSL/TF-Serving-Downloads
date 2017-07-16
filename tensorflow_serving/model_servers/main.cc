@@ -205,6 +205,12 @@ class PredictionServiceImpl final : public PredictionService::Service {
 
     LOG(INFO) << "[Yitao] *** Predict() is called! ***";
     
+    // This is for my dumb dynamically load/remove a new model
+    // By changing the list of models in the tfserv.conf file,
+    // we are able to dynamically load/remove models.
+    // But the problem is that in current version, I am reusing
+    // an existing gRPC call.
+    // To-do: Add a dedicated gRPC call to dynamically load/remove models
     // if (tmp_first_time_) {
     //   LOG(INFO) << "[Yitao] @@@@@@ Temp solution, we begin to ReloadConfig()! @@@@@@";
     //   auto model_server_config = ReadProtoFromFile<ModelServerConfig>("tfserv.conf");
