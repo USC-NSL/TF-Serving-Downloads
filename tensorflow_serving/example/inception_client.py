@@ -30,6 +30,8 @@ from tensorflow_serving.apis import prediction_service_pb2
 
 import time
 
+import sys
+
 tf.app.flags.DEFINE_string('server', 'localhost:9000',
                            'PredictionService host:port')
 tf.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
@@ -54,14 +56,18 @@ def main(_):
     # added a loop to test multiple images w/o batching
     # printed meta-data including the running time
     # print(time.time())
-    for i in range(1):
+    for i in range(1000):
       start = time.time()
       result = stub.Predict(request, 60.0)  # 10 secs timeout
       end = time.time()
-      print("[%s, %s] = %s" % (str(start), str(end), str(end - start)))
-      print(result)
+      # print('.', end='')
+      sys.stdout.write('.')
+      sys.stdout.flush()
+      # print("[%s, %s] = %s" % (str(start), str(end), str(end - start)))
+      # print(result)
     # print(time.time())
 
+    print('\nFinished!')
 
 if __name__ == '__main__':
   tf.app.run()

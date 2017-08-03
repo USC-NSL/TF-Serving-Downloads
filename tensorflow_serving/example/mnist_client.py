@@ -30,6 +30,8 @@ from __future__ import print_function
 import sys
 import threading
 
+import time
+
 # This is a placeholder for a Google-internal import.
 
 from grpc.beta import implementations
@@ -142,6 +144,7 @@ def do_inference(hostport, work_dir, concurrency, num_tests):
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
   result_counter = _ResultCounter(num_tests, concurrency)
   for _ in range(num_tests):
+    start = time.time()
     request = predict_pb2.PredictRequest()
     request.model_spec.name = 'mnist'
     request.model_spec.signature_name = 'predict_images'
@@ -152,6 +155,8 @@ def do_inference(hostport, work_dir, concurrency, num_tests):
     result_future = stub.Predict.future(request, 5.0)  # 5 seconds
     result_future.add_done_callback(
         _create_rpc_callback(label[0], result_counter))
+    end = time.time()
+    # print("[%s, %s] = %s" % (str(start), str(end), str(end - start)))
   return result_counter.get_error_rate()
 
 

@@ -211,13 +211,13 @@ class PredictionServiceImpl final : public PredictionService::Service {
     // But the problem is that in current version, I am reusing
     // an existing gRPC call.
     // Yitao-to-do: Add a dedicated gRPC call to dynamically load/remove models
-     if (tmp_first_time_) {
-       LOG(INFO) << "[Yitao] @@@@@@ Temp solution, we begin to ReloadConfig()! @@@@@@";
-       auto model_server_config = ReadProtoFromFile<ModelServerConfig>("tfserv.conf");
-       core_->ReloadConfig(model_server_config);
-       LOG(INFO) << "[Yitao] @@@@@@ Temp solution, we finish to ReloadConfig()! @@@@@@";
-     }
-     tmp_first_time_ = false;
+     // if (tmp_first_time_) {
+     //   LOG(INFO) << "[Yitao] @@@@@@ Temp solution, we begin to ReloadConfig()! @@@@@@";
+     //   auto model_server_config = ReadProtoFromFile<ModelServerConfig>("tfserv.conf");
+     //   core_->ReloadConfig(model_server_config);
+     //   LOG(INFO) << "[Yitao] @@@@@@ Temp solution, we finish to ReloadConfig()! @@@@@@";
+     // }
+     // tmp_first_time_ = false;
 
     tensorflow::RunOptions run_options = tensorflow::RunOptions();
     // By default, this is infinite which is the same default as RunOptions.
