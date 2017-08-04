@@ -29,7 +29,7 @@ from tensorflow_serving.apis import predict_pb2
 from tensorflow_serving.apis import prediction_service_pb2
 
 import time
-
+import threading
 import sys
 
 tf.app.flags.DEFINE_string('server', 'localhost:9000',
@@ -37,6 +37,10 @@ tf.app.flags.DEFINE_string('server', 'localhost:9000',
 tf.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
 FLAGS = tf.app.flags.FLAGS
 
+def myFunc(stub, request):
+  result = stub.Predict(request, 60.0)
+  sys.stdout.write('.')
+  sys.stdout.flush()
 
 def main(_):
   host, port = FLAGS.server.split(':')
@@ -56,16 +60,30 @@ def main(_):
     # added a loop to test multiple images w/o batching
     # printed meta-data including the running time
     # print(time.time())
-    for i in range(1000):
-      start = time.time()
-      result = stub.Predict(request, 60.0)  # 10 secs timeout
-      end = time.time()
-      # print('.', end='')
-      sys.stdout.write('.')
-      sys.stdout.flush()
+    # for i in range(10):
+      # start = time.time()
+      # result = stub.Predict(request, 60.0)  # 10 secs timeout
+      # end = time.time()
+
+      # sys.stdout.write('.')
+      # sys.stdout.flush()
+
       # print("[%s, %s] = %s" % (str(start), str(end), str(end - start)))
       # print(result)
-    # print(time.time())
+
+    num_tests = 10
+    tPool = []
+    for i in range(num_tests):
+      tPool.append(threading.Thread(target = myFunc, args = (stub, request)))
+
+    for i in range(num_tests):
+      t = tPool[i]
+      t.start()
+
+    for i in range(num_tests):
+      t = tPool[i]
+      t.join()
+
 
     print('\nFinished!')
 
