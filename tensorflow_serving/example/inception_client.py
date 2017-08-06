@@ -37,17 +37,10 @@ tf.app.flags.DEFINE_string('server', 'localhost:9000',
 tf.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
 FLAGS = tf.app.flags.FLAGS
 
-def myFunc(stub, request):
-  result = stub.Predict(request, 60.0)
-  sys.stdout.write('.')
-  sys.stdout.flush()
-
-def main(_):
-  host, port = FLAGS.server.split(':')
-  channel = implementations.insecure_channel(host, int(port))
-  stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
-  # Send request
-  with open(FLAGS.image, 'rb') as f:
+def myFunc(stub, i):
+  input_file = "inception-input/dog-%s.jpg" % str(i).zfill(2)
+  # print(input_file)
+  with open(input_file, 'rb') as f:
     # See prediction_service.proto for gRPC request/response details.
     data = f.read()
     request = predict_pb2.PredictRequest()
@@ -55,6 +48,24 @@ def main(_):
     request.model_spec.signature_name = 'predict_images'
     request.inputs['images'].CopyFrom(
         tf.contrib.util.make_tensor_proto(data, shape=[1]))
+    
+    result = stub.Predict(request, 60.0)
+    sys.stdout.write('.')
+    sys.stdout.flush()
+
+def main(_):
+  host, port = FLAGS.server.split(':')
+  channel = implementations.insecure_channel(host, int(port))
+  stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
+  # Send request
+  # with open(FLAGS.image, 'rb') as f:
+  #   # See prediction_service.proto for gRPC request/response details.
+  #   data = f.read()
+  #   request = predict_pb2.PredictRequest()
+  #   request.model_spec.name = 'inception'
+  #   request.model_spec.signature_name = 'predict_images'
+  #   request.inputs['images'].CopyFrom(
+  #       tf.contrib.util.make_tensor_proto(data, shape=[1]))
 
     # minor changes to the original inception_client.py
     # added a loop to test multiple images w/o batching
@@ -71,21 +82,22 @@ def main(_):
       # print("[%s, %s] = %s" % (str(start), str(end), str(end - start)))
       # print(result)
 
-    num_tests = 10
-    tPool = []
-    for i in range(num_tests):
-      tPool.append(threading.Thread(target = myFunc, args = (stub, request)))
+  num_tests = 10
+  tPool = []
+  for i in range(num_tests):
+    tPool.append(threading.Thread(target = myFunc, args = (stub, i)))
 
-    for i in range(num_tests):
-      t = tPool[i]
-      t.start()
+  for i in range(num_tests):
+    t = tPool[i]
+    t.start()
+    time.sleep(3.0)
 
-    for i in range(num_tests):
-      t = tPool[i]
-      t.join()
+  for i in range(num_tests):
+    t = tPool[i]
+    t.join()
 
 
-    print('\nFinished!')
+  print('\nFinished!')
 
 if __name__ == '__main__':
   tf.app.run()

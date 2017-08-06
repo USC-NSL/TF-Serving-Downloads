@@ -122,6 +122,16 @@ def _create_rpc_callback(label, result_counter):
     result_counter.dec_active()
   return _callback
 
+def myFunc(test_data_set, stub):
+  request = predict_pb2.PredictRequest()
+  request.model_spec.name = 'mnist'
+  request.model_spec.signature_name = 'predict_images'
+  image, label = test_data_set.next_batch(1)
+  request.inputs['images'].CopyFrom(
+      tf.contrib.util.make_tensor_proto(image[0], shape=[1, image[0].size]))
+  tmp_result = stub.Predict(request, 10.0)
+  sys.stdout.write('.')
+  sys.stdout.flush()
 
 def do_inference(hostport, work_dir, concurrency, num_tests):
   """Tests PredictionService with concurrent requests.
@@ -139,25 +149,47 @@ def do_inference(hostport, work_dir, concurrency, num_tests):
     IOError: An error occurred processing test data set.
   """
   test_data_set = mnist_input_data.read_data_sets(work_dir).test
+
+  raw_input("Press Enter to continue...")
+
   host, port = hostport.split(':')
   channel = implementations.insecure_channel(host, int(port))
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
-  result_counter = _ResultCounter(num_tests, concurrency)
+  # result_counter = _ResultCounter(num_tests, concurrency)
+
+  tPool = []  
   for _ in range(num_tests):
-    start = time.time()
-    request = predict_pb2.PredictRequest()
-    request.model_spec.name = 'mnist'
-    request.model_spec.signature_name = 'predict_images'
-    image, label = test_data_set.next_batch(1)
-    request.inputs['images'].CopyFrom(
-        tf.contrib.util.make_tensor_proto(image[0], shape=[1, image[0].size]))
-    result_counter.throttle()
-    result_future = stub.Predict.future(request, 5.0)  # 5 seconds
-    result_future.add_done_callback(
-        _create_rpc_callback(label[0], result_counter))
-    end = time.time()
-    # print("[%s, %s] = %s" % (str(start), str(end), str(end - start)))
-  return result_counter.get_error_rate()
+    # myFunc(test_data_set, stub)
+    tPool.append(threading.Thread(target = myFunc, args = (test_data_set, stub)))
+
+  for i in range(num_tests):
+    t = tPool[i]
+    t.start()
+    if (i % 60 == 0):
+      time.sleep(5.0)
+
+  for i in range(num_tests):
+    t = tPool[i]
+    t.join()
+
+  print('\nFinished!')
+
+  #   # start = time.time()
+  #   request = predict_pb2.PredictRequest()
+  #   request.model_spec.name = 'mnist'
+  #   request.model_spec.signature_name = 'predict_images'
+  #   image, label = test_data_set.next_batch(1)
+  #   request.inputs['images'].CopyFrom(
+  #       tf.contrib.util.make_tensor_proto(image[0], shape=[1, image[0].size]))
+  #   # result_counter.throttle()
+  #   # result_future = stub.Predict.future(request, 5.0)  # 5 seconds
+  #   # result_future.add_done_callback(
+  #       # _create_rpc_callback(label[0], result_counter))
+  #   # end = time.time()
+  #   tmp_result = stub.Predict(request, 5.0)
+  #   print(tmp_result)
+  #   # print("[%s, %s] = %s" % (str(start), str(end), str(end - start)))
+  # # return result_counter.get_error_rate()
 
 
 def main(_):
@@ -167,9 +199,11 @@ def main(_):
   if not FLAGS.server:
     print('please specify server host:port')
     return
-  error_rate = do_inference(FLAGS.server, FLAGS.work_dir,
+  # error_rate = do_inference(FLAGS.server, FLAGS.work_dir,
+  #                           FLAGS.concurrency, FLAGS.num_tests)
+  # print('\nInference error rate: %s%%' % (error_rate * 100))
+  do_inference(FLAGS.server, FLAGS.work_dir,
                             FLAGS.concurrency, FLAGS.num_tests)
-  print('\nInference error rate: %s%%' % (error_rate * 100))
 
 
 if __name__ == '__main__':
