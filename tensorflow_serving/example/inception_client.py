@@ -38,7 +38,7 @@ tf.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
 FLAGS = tf.app.flags.FLAGS
 
 def myFunc(stub, i):
-  input_file = "inception-input/dog-%s.jpg" % str(i).zfill(2)
+  input_file = "inception-input/dog-%s.jpg" % str(i).zfill(3)
   # print(input_file)
   with open(input_file, 'rb') as f:
     # See prediction_service.proto for gRPC request/response details.
@@ -82,7 +82,7 @@ def main(_):
       # print("[%s, %s] = %s" % (str(start), str(end), str(end - start)))
       # print(result)
 
-  num_tests = 10
+  num_tests = 320
   tPool = []
   for i in range(num_tests):
     tPool.append(threading.Thread(target = myFunc, args = (stub, i)))
@@ -90,7 +90,7 @@ def main(_):
   for i in range(num_tests):
     t = tPool[i]
     t.start()
-    time.sleep(3.0)
+    # time.sleep(2.0)
 
   for i in range(num_tests):
     t = tPool[i]

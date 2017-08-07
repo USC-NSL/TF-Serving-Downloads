@@ -165,8 +165,9 @@ def do_inference(hostport, work_dir, concurrency, num_tests):
   for i in range(num_tests):
     t = tPool[i]
     t.start()
-    if (i % 60 == 0):
-      time.sleep(5.0)
+    # if (i % 60 == 0):
+    #   time.sleep(5.0)
+    time.sleep(1.0)
 
   for i in range(num_tests):
     t = tPool[i]

@@ -14,3 +14,5 @@ node_modules
 /util/python/python_lib
 inception-v3
 log
+inception-input/*.jpg
+inception-input
