@@ -1,19 +1,36 @@
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_name=inception --model_base_path=/home/yitao/Downloads/tmp/inception_model
+bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
+
+
+
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_config_file=tfserv.conf
+bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
+bazel-bin/tensorflow_serving/example/mnist_client --num_tests=10 --server=localhost:9000
+
+
+
+
 # play with MNIST
-rm -rf /tmp/mnist_model
-bazel-bin/tensorflow_serving/example/mnist_saved_model --training_iteration=100 --model_version=1 /tmp/mnist_model
-bazel-bin/tensorflow_serving/example/mnist_saved_model --training_iteration=2000 --model_version=2 /tmp/mnist_model
+rm -rf /home/yitao/Downloads/tmp/mnist_model
+bazel-bin/tensorflow_serving/example/mnist_saved_model --training_iteration=100 --model_version=1 /home/yitao/Downloads/tmp/mnist_model
+bazel-bin/tensorflow_serving/example/mnist_saved_model --training_iteration=2000 --model_version=2 /home/yitao/Downloads/tmp/mnist_model
 
-rm -rf /tmp/monitored
-mkdir /tmp/monitored
-cp -r /tmp/mnist_model/1 /tmp/monitored
-bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=mnist --model_base_path=/tmp/monitored
-
-bazel-bin/tensorflow_serving/example/mnist_client --num_tests=10 --server=localhost:9000
-
-cp -r /tmp/mnist_model/2 /tmp/monitored
+rm -rf /home/yitao/Downloads/tmp/monitored
+mkdir /home/yitao/Downloads/tmp/monitored
+cp -r /home/yitao/Downloads/tmp/mnist_model/1 /home/yitao/Downloads/tmp/monitored
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=mnist --model_base_path=/home/yitao/Downloads/tmp/monitored
 
 bazel-bin/tensorflow_serving/example/mnist_client --num_tests=10 --server=localhost:9000
 
+cp -r /home/yitao/Downloads/tmp/mnist_model/2 /home/yitao/Downloads/tmp/monitored
+
+bazel-bin/tensorflow_serving/example/mnist_client --num_tests=10 --server=localhost:9000
+
+
+
+
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=inception --model_base_path=/home/yitao/Downloads/tmp/inception_model
+bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
 
 
 
@@ -21,10 +38,10 @@ bazel-bin/tensorflow_serving/example/mnist_client --num_tests=10 --server=localh
 # play with Inception
 curl -O http://download.tensorflow.org/models/image/imagenet/inception-v3-2016-03-01.tar.gz
 tar xzf inception-v3-2016-03-01.tar.gz
-bazel-bin/tensorflow_serving/example/inception_saved_model --checkpoint_dir=inception-v3 --output_dir=/tmp/inception_model
+bazel-bin/tensorflow_serving/example/inception_saved_model --checkpoint_dir=inception-v3 --output_dir=/home/yitao/Downloads/tmp/inception_model
 
 
-bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=inception --model_base_path=/tmp/inception_model
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=inception --model_base_path=/home/yitao/Downloads/tmp/inception_model
 bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000 --image dog.jpg
 
 

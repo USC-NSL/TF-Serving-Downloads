@@ -104,32 +104,38 @@ def myFunc(stub, i):
   request.model_spec.signature_name = 'predict_images'
 
   batchSize = 10
-  # durationSum = 0.0
+  durationSum = 0.0
+  runNum = 100
 
-  image_data = []
-  # start = time.time()
-  for j in range(batchSize):
-    image = "/home/yitao/Downloads/inception-input/%s/dog-%s.jpg" % (str(i).zfill(3), str(j).zfill(3))
-    with open(image, 'rb') as f:
-      image_data.append(f.read())
+  for k in range(runNum):
+    image_data = []
+    start = time.time()
+    for j in range(batchSize):
+      image = "/home/yitao/Downloads/inception-input/%s/dog-%s.jpg" % (str(i % 100).zfill(3), str(j).zfill(3))
+      with open(image, 'rb') as f:
+        image_data.append(f.read())
 
-  request.inputs['images'].CopyFrom(
-      tf.contrib.util.make_tensor_proto(image_data, shape=[len(image_data)]))
+    request.inputs['images'].CopyFrom(
+        tf.contrib.util.make_tensor_proto(image_data, shape=[len(image_data)]))
 
-  result = stub.Predict(request, 60.0)  # 10 secs timeout
-  # print(result)
-  # end = time.time()
-  # print("it takes %s sec" % str(end - start))
-  # durationSum += (end - start)
-  sys.stdout.write('.')
-  sys.stdout.flush()
+    result = stub.Predict(request, 60.0)  # 10 secs timeout
+    # print(result)
+    end = time.time()
+    duration = (end - start)
+    print("it takes %s sec" % str(duration))
+    if (k != 0):
+      durationSum += duration
+    # sys.stdout.write('.')
+    # sys.stdout.flush()
+
+  # print("on average, it takes %s sec to run a batch of %d images" % (str(durationSum / (runNum - 1)), batchSize))
 
 def main(_):
   host, port = FLAGS.server.split(':')
   channel = implementations.insecure_channel(host, int(port))
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
 
-  num_tests = 100
+  num_tests = 1
   tPool = []
   for i in range(num_tests):
     tPool.append(threading.Thread(target = myFunc, args = (stub, i)))

@@ -206,6 +206,7 @@ UnarySourceAdapter<InputType, OutputType>::Adapt(
   for (const ServableData<InputType>& version : versions) {
     if (version.status().ok()) {
       OutputType adapted_data;
+      // LOG(INFO) << "[Yitao] In UnarySourceAdapter::Adapter(), we will call Convert()!";
       Status adapt_status = Convert(version.DataOrDie(), &adapted_data);
       if (adapt_status.ok()) {
         adapted_versions.emplace_back(
