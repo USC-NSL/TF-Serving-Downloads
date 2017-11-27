@@ -105,7 +105,7 @@ def myFunc(stub, i):
 
   batchSize = 10
   durationSum = 0.0
-  runNum = 100
+  runNum = 13
 
   for k in range(runNum):
     image_data = []
