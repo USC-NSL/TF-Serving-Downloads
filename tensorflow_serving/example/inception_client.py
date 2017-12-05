@@ -105,7 +105,7 @@ def myFunc(stub, i):
 
   batchSize = 10
   durationSum = 0.0
-  runNum = 21
+  runNum = 102
 
   for k in range(runNum):
     image_data = []
@@ -123,12 +123,12 @@ def myFunc(stub, i):
     end = time.time()
     duration = (end - start)
     print("it takes %s sec" % str(duration))
-    if (k != 0):
+    if (k != 0 and k != 3):
       durationSum += duration
     # sys.stdout.write('.')
     # sys.stdout.flush()
 
-  print("on average, it takes %s sec to run a batch of %d images" % (str(durationSum / (runNum - 1)), batchSize))
+  print("on average, it takes %s sec to run a batch of %d images" % (str(durationSum / (runNum - 2)), batchSize))
 
 def main(_):
   start = time.time()
