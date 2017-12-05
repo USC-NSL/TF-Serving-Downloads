@@ -105,7 +105,7 @@ def myFunc(stub, i):
 
   batchSize = 10
   durationSum = 0.0
-  runNum = 13
+  runNum = 21
 
   for k in range(runNum):
     image_data = []
@@ -128,9 +128,11 @@ def myFunc(stub, i):
     # sys.stdout.write('.')
     # sys.stdout.flush()
 
-  # print("on average, it takes %s sec to run a batch of %d images" % (str(durationSum / (runNum - 1)), batchSize))
+  print("on average, it takes %s sec to run a batch of %d images" % (str(durationSum / (runNum - 1)), batchSize))
 
 def main(_):
+  start = time.time()
+
   host, port = FLAGS.server.split(':')
   channel = implementations.insecure_channel(host, int(port))
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
@@ -149,8 +151,10 @@ def main(_):
     t = tPool[i]
     t.join()
 
+  end = time.time()
 
   print('\nFinished!')
+  print('The total running time is ' + str(end - start))
 
 
 if __name__ == '__main__':

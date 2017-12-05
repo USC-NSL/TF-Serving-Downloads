@@ -152,6 +152,8 @@ def do_inference(hostport, work_dir, concurrency, num_tests):
 
   raw_input("Press Enter to continue...")
 
+  start = time.time()
+
   host, port = hostport.split(':')
   channel = implementations.insecure_channel(host, int(port))
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
@@ -173,7 +175,10 @@ def do_inference(hostport, work_dir, concurrency, num_tests):
     t = tPool[i]
     t.join()
 
+  end = time.time()
+
   print('\nFinished!')
+  print('The total running time is ' + str(end - start))
 
   #   # start = time.time()
   #   request = predict_pb2.PredictRequest()
