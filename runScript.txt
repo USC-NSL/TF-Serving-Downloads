@@ -67,3 +67,13 @@ bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 -
 
 bazel-bin/tensorflow_serving/example/mnist_client --num_tests=10 --server=localhost:9000
 bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000 --image dog.jpg
+
+
+
+
+# For Weimin's example
+# https://weiminwang.blog/2017/09/12/introductory-guide-to-tensorflow-serving/
+cd Documents/fun-project/Serving-TensorFlow-Model
+python export_model.py
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=weimin_model --model_base_path=/home/yitao/Documents/fun-project/Serving-TensorFlow-Model
+bazel-bin/tensorflow_serving/example/weimin_client --server localhost:9000
