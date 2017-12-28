@@ -2,11 +2,11 @@ bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batc
 bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
 
 
-
+*******************
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_config_file=tfserv.conf
 bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
 bazel-bin/tensorflow_serving/example/mnist_client --num_tests=10 --server=localhost:9000
-
+*******************
 
 
 
@@ -73,7 +73,27 @@ bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000 --
 
 # For Weimin's example
 # https://weiminwang.blog/2017/09/12/introductory-guide-to-tensorflow-serving/
+# https://github.com/sugartom/Serving-TensorFlow-Model
 cd Documents/fun-project/Serving-TensorFlow-Model
 python export_model.py
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=weimin_model --model_base_path=/home/yitao/Documents/fun-project/Serving-TensorFlow-Model
 bazel-bin/tensorflow_serving/example/weimin_client --server localhost:9000
+
+
+# For Gan example
+# https://towardsdatascience.com/how-to-deploy-machine-learning-models-with-tensorflow-part-1-make-your-model-ready-for-serving-776a14ec3198
+# https://github.com/sugartom/tf_serving_example
+cd Documents/fun-project/tf_serving_example
+python svnh_semi_supervised_model_train.py
+python svnh_semi_supervised_model_saved.py --checkpoint-dir=./checkpoints --output_dir=./gan-export --model-version=1
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=gan_model --model_base_path=/home/yitao/Documents/fun-project/tf_serving_example/gan-export
+bazel-bin/tensorflow_serving/example/gan_client --server localhost:9000 --image=/home/yitao/Documents/fun-project/tf_serving_example/svnh_test_images/image_3.jpg
+
+# For Caffe-MNIST example
+# https://github.com/sugartom/caffe-tensorflow/tree/master/examples/mnist
+cd Documents/fun-project/caffe-tensorflow
+./convert.py examples/mnist/lenet.prototxt --code-output-path=mynet.py
+./convert.py examples/mnist/lenet.prototxt --caffemodel examples/mnist/lenet_iter_10000.caffemodel --data-output-path=mynet.npy
+python finetune_mnist.py
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_mnist --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/caffe_mnist
+bazel-bin/tensorflow_serving/example/caffe_mnist_client --num_tests=1000 --server localhost:9000
