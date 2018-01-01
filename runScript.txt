@@ -97,3 +97,20 @@ cd Documents/fun-project/caffe-tensorflow
 python finetune_mnist.py
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_mnist --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/caffe_mnist
 bazel-bin/tensorflow_serving/example/caffe_mnist_client --num_tests=1000 --server localhost:9000
+
+# For Caffe-GoogleNet example
+# https://github.com/sugartom/caffe-tensorflow/tree/master/examples/imagenet
+cd Documents/fun-project/caffe-tensorflow/examples/imagenet
+mkdir tomModels
+cd tomModels
+wget https://raw.githubusercontent.com/BVLC/caffe/master/models/bvlc_googlenet/deploy.prototxt
+wget http://dl.caffe.berkeleyvision.org/bvlc_googlenet.caffemodel
+cd ../../..
+./convert.py examples/imagenet/tomModels/deploy.prototxt --code-output-path=examples/imagenet/tomModels/googlenet.py
+./convert.py examples/imagenet/tomModels/deploy.prototxt --caffemodel examples/imagenet/tomModels/bvlc_googlenet.caffemodel --data-output-path=examples/imagenet/tomModels/googlenet.npy
+cd examples/imagenet
+mkdir caffe_googlenet
+./classify.py tomModels/googlenet.npy /home/yitao/Documents/serving/dog.jpg
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_googlenet --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_googlenet
+bazel-bin/tensorflow_serving/example/caffe_googlenet_client --server localhost:9000 --image dog.jpg
+
