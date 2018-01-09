@@ -4,6 +4,7 @@ node_modules
 /bazel-genfiles
 /bazel-out
 /bazel-serving
+/bazel-TF-Serving-Downloads
 /bazel-tensorflow
 /bazel-tensorflow_serving
 /bazel-testlogs
