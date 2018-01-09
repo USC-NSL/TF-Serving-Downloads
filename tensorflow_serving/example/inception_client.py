@@ -98,12 +98,12 @@ FLAGS = tf.app.flags.FLAGS
 
 #   print("on average, it takes %s sec" % str(durationSum / runNum))
 
-def myFunc(stub, i):
+def myFuncWarmUp(stub, i):
   request = predict_pb2.PredictRequest()
   request.model_spec.name = 'inception'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 10
+  batchSize = 100
   durationSum = 0.0
   runNum = 103
 
@@ -128,7 +128,40 @@ def myFunc(stub, i):
     # sys.stdout.write('.')
     # sys.stdout.flush()
 
-  print("on average, it takes %s sec to run a batch of %d images" % (str(durationSum / (runNum - 3)), batchSize))
+  print("[Warm up] on average, it takes %s sec to run a batch of %d images over %d runs" % (str(durationSum / (runNum - 3)), batchSize, (runNum - 3)))
+
+def myFuncParallel(stub, i):
+  request = predict_pb2.PredictRequest()
+  request.model_spec.name = 'inception'
+  request.model_spec.signature_name = 'predict_images'
+
+  batchSize = 100
+  durationSum = 0.0
+  runNum = 1
+
+  for k in range(runNum):
+    image_data = []
+    start = time.time()
+    for j in range(batchSize):
+      image = "/home/yitao/Downloads/inception-input/%s/dog-%s.jpg" % (str(i % 100).zfill(3), str(j).zfill(3))
+      with open(image, 'rb') as f:
+        image_data.append(f.read())
+
+    request.inputs['images'].CopyFrom(
+        tf.contrib.util.make_tensor_proto(image_data, shape=[len(image_data)]))
+
+    result = stub.Predict(request, 60.0)  # 10 secs timeout
+    # print(result)
+    end = time.time()
+    duration = (end - start)
+    print("it takes %s sec" % str(duration))
+    # if (k != 0 and k != 3 and k != 8):
+    if True:
+      durationSum += duration
+    # sys.stdout.write('.')
+    # sys.stdout.flush()
+
+  print("[Parallel] on average, it takes %s sec to run a batch of %d images over %d runs" % (str(durationSum / runNum), batchSize, runNum))
 
 def main(_):
   start = time.time()
@@ -137,10 +170,13 @@ def main(_):
   channel = implementations.insecure_channel(host, int(port))
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
 
-  num_tests = 1
+  # run Inception job
+  myFuncWarmUp(stub, 0)
+
+  num_tests = 0
   tPool = []
   for i in range(num_tests):
-    tPool.append(threading.Thread(target = myFunc, args = (stub, i)))
+    tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i)))
 
   for i in range(num_tests):
     t = tPool[i]
