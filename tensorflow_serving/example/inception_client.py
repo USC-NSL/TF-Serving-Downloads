@@ -154,14 +154,14 @@ def myFuncParallel(stub, i):
     # print(result)
     end = time.time()
     duration = (end - start)
-    print("it takes %s sec" % str(duration))
+    print("[thread-%d] it takes %s sec" % (i, str(duration)))
     # if (k != 0 and k != 3 and k != 8):
     if True:
       durationSum += duration
     # sys.stdout.write('.')
     # sys.stdout.flush()
 
-  print("[Parallel] on average, it takes %s sec to run a batch of %d images over %d runs" % (str(durationSum / runNum), batchSize, runNum))
+  print("[Parallel-thread-%d] on average, it takes %s sec to run a batch of %d images over %d runs" % (i, str(durationSum / runNum), batchSize, runNum))
 
 def main(_):
   start = time.time()
