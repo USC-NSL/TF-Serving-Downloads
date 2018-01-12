@@ -103,7 +103,7 @@ def myFuncWarmUp(stub, i):
   request.model_spec.name = 'inception'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 10
+  batchSize = 100
   durationSum = 0.0
   runNum = 13
 
@@ -135,9 +135,9 @@ def myFuncParallel(stub, i):
   request.model_spec.name = 'inception'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 10
+  batchSize = 100
   durationSum = 0.0
-  runNum = 10
+  runNum = 1
 
   for k in range(runNum):
     image_data = []
