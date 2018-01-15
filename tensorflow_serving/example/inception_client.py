@@ -164,7 +164,7 @@ def myFuncParallel(stub, i):
   print("[Parallel-thread-%d] on average, it takes %s sec to run a batch of %d images over %d runs" % (i, str(durationSum / runNum), batchSize, runNum))
 
 def main(_):
-  start = time.time()
+  # start = time.time()
 
   host, port = FLAGS.server.split(':')
   channel = implementations.insecure_channel(host, int(port))
@@ -173,11 +173,12 @@ def main(_):
   # run Inception job
   myFuncWarmUp(stub, 0)
 
-  num_tests = 10
+  num_tests = 2
   tPool = []
   for i in range(num_tests):
     tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i)))
 
+  start = time.time()
   for i in range(num_tests):
     t = tPool[i]
     t.start()
@@ -190,7 +191,7 @@ def main(_):
   end = time.time()
 
   print('\nFinished!')
-  print('The total running time is ' + str(end - start))
+  print('[Parallel] The total running time to run %d concurrent jobs is %s' % (num_tests, str(end - start)))
 
 
 if __name__ == '__main__':
