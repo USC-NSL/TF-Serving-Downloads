@@ -110,7 +110,7 @@ cd ../../..
 ./convert.py examples/imagenet/tomModels/deploy.prototxt --caffemodel examples/imagenet/tomModels/bvlc_googlenet.caffemodel --data-output-path=examples/imagenet/tomModels/googlenet.npy
 cd examples/imagenet
 mkdir caffe_googlenet
-./classify.py tomModels/googlenet.npy /home/yitao/Documents/serving/dog.jpg
+./classify.py tomModels/googlenet.npy /home/yitao/Documents/TF-Serving-Downloads/dog.jpg
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_googlenet --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_googlenet
 bazel-bin/tensorflow_serving/example/caffe_googlenet_client --server localhost:9000 --image dog.jpg
 
