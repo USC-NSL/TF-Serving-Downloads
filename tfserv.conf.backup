@@ -1,7 +1,7 @@
 model_config_list: {
   config: {
-    name: "caffe_googlenet",
-    base_path: "/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_googlenet",
+    name: "mnist",
+    base_path: "/home/yitao/Downloads/tmp/monitored",
     model_platform: "tensorflow"
   },
   config: {
