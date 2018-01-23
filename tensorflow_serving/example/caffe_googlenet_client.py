@@ -228,7 +228,7 @@ def main(_):
   # run Inception job
   myFuncWarmUp(stub, 0)
 
-  num_tests = 0
+  num_tests = 2
   tPool = []
   for i in range(num_tests):
     tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i)))

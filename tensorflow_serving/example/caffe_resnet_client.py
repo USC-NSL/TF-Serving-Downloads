@@ -37,70 +37,12 @@ tf.app.flags.DEFINE_string('server', 'localhost:9000',
 tf.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
 FLAGS = tf.app.flags.FLAGS
 
-
-# def main(_):
-#   host, port = FLAGS.server.split(':')
-#   channel = implementations.insecure_channel(host, int(port))
-#   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
-#   # Send request
-
-#   request = predict_pb2.PredictRequest()
-#   request.model_spec.name = 'inception'
-#   request.model_spec.signature_name = 'predict_images'
-
-#   runNum = 100
-#   durationSum = 0.0
-
-#   for j in range(runNum):
-#     start = time.time()
-#     with open("/home/yitao/Downloads/serving/inception-input/dog-000.jpg", 'rb') as f:
-#       # See prediction_service.proto for gRPC request/response details.
-#       data = f.read()
-#       request.inputs['images'].CopyFrom(
-#           tf.contrib.util.make_tensor_proto(data, shape=[1]))
-#       result = stub.Predict(request, 10.0)  # 10 secs timeout
-#       # print(result)
-#     end = time.time()
-#     print("it takes %s sec" % str(end - start))
-#     durationSum += (end - start)
-
-#   print("on average, it takes %s sec" % str(durationSum / runNum))
-
-# def main(_):
-#   host, port = FLAGS.server.split(':')
-#   channel = implementations.insecure_channel(host, int(port))
-#   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
-#   # Send request
-#   request = predict_pb2.PredictRequest()
-#   request.model_spec.name = 'inception'
-#   request.model_spec.signature_name = 'predict_images'
-
-#   runNum = 100
-#   batchSize = 500
-#   durationSum = 0.0
-
-#   for j in range(runNum):
-#     image_data = []
-#     start = time.time()
-#     for i in range(batchSize):
-#       image = "/home/yitao/Downloads/serving/inception-input/dog-%s.jpg" % str(i).zfill(3)
-#       with open(image, 'rb') as f:
-#         image_data.append(f.read())
-
-#     request.inputs['images'].CopyFrom(
-#         tf.contrib.util.make_tensor_proto(image_data, shape=[len(image_data)]))
-
-#     result = stub.Predict(request, 10.0)  # 10 secs timeout
-#     # print(result)
-#     end = time.time()
-#     # print("it takes %s sec" % str(end - start))
-#     durationSum += (end - start)
-
-#   print("on average, it takes %s sec" % str(durationSum / runNum))
+import os.path as osp
+import numpy as np
 
 def myFuncWarmUp(stub, i):
   request = predict_pb2.PredictRequest()
-  request.model_spec.name = 'inception'
+  request.model_spec.name = 'caffe_resnet152'
   request.model_spec.signature_name = 'predict_images'
 
   batchSize = 200
@@ -132,7 +74,7 @@ def myFuncWarmUp(stub, i):
 
 def myFuncParallel(stub, i):
   request = predict_pb2.PredictRequest()
-  request.model_spec.name = 'inception'
+  request.model_spec.name = 'caffe_resnet152'
   request.model_spec.signature_name = 'predict_images'
 
   batchSize = 200
@@ -172,18 +114,6 @@ def main(_):
 
   # run Inception job
   myFuncWarmUp(stub, 0)
-
-  time.sleep(1)
-  print("...5")
-  time.sleep(1)
-  print("...4")
-  time.sleep(1)
-  print("...3")
-  time.sleep(1)
-  print("...2")
-  time.sleep(1)
-  print("...1")
-  time.sleep(1)
 
   num_tests = 2
   tPool = []
