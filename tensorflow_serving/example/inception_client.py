@@ -103,7 +103,7 @@ def myFuncWarmUp(stub, i):
   request.model_spec.name = 'inception'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 200
+  batchSize = 100
   durationSum = 0.0
   runNum = 13
 
@@ -135,7 +135,7 @@ def myFuncParallel(stub, i):
   request.model_spec.name = 'inception'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 200
+  batchSize = 100
   durationSum = 0.0
   runNum = 1
 
@@ -154,7 +154,7 @@ def myFuncParallel(stub, i):
     # print(result)
     end = time.time()
     duration = (end - start)
-    print("[thread-%d] it takes %s sec" % (i, str(duration)))
+    print("[thread-%d-%d] it takes %s sec" % (i, k, str(duration)))
     # if (k != 0 and k != 3 and k != 8):
     if True:
       durationSum += duration
@@ -173,17 +173,17 @@ def main(_):
   # run Inception job
   myFuncWarmUp(stub, 0)
 
-  time.sleep(1)
-  print("...5")
-  time.sleep(1)
-  print("...4")
-  time.sleep(1)
-  print("...3")
-  time.sleep(1)
-  print("...2")
-  time.sleep(1)
-  print("...1")
-  time.sleep(1)
+  # time.sleep(1)
+  # print("...5")
+  # time.sleep(1)
+  # print("...4")
+  # time.sleep(1)
+  # print("...3")
+  # time.sleep(1)
+  # print("...2")
+  # time.sleep(1)
+  # print("...1")
+  # time.sleep(1)
 
   num_tests = 2
   tPool = []

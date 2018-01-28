@@ -4,7 +4,12 @@ bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
 
 *******************
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_config_file=tfserv.conf
+bazel-bin/tensorflow_serving/example/olympia_client --server localhost:9000
+
+
 bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
+bazel-bin/tensorflow_serving/example/caffe_googlenet_client --server localhost:9000
+
 bazel-bin/tensorflow_serving/example/mnist_client --num_tests=10 --server=localhost:9000
 *******************
 
@@ -113,4 +118,15 @@ mkdir caffe_googlenet
 ./classify.py tomModels/googlenet.npy /home/yitao/Documents/TF-Serving-Downloads/dog.jpg
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_googlenet --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_googlenet
 bazel-bin/tensorflow_serving/example/caffe_googlenet_client --server localhost:9000 --image dog.jpg
+
+# For Caffe-ResNet example
+# Firstly, download prototxt and caffemodel files from Kaiming's website, then...
+./convert.py examples/imagenet/tomModels/ResNet-50-deploy.prototxt --caffemodel examples/imagenet/tomModels/ResNet-50-model.caffemodel --data-output-path=examples/imagenet/tomModels/ResNet-50.npy
+./convert.py examples/imagenet/tomModels/ResNet-152-deploy.prototxt --caffemodel examples/imagenet/tomModels/ResNet-152-model.caffemodel --data-output-path=examples/imagenet/tomModels/ResNet-152.npy
+# !!! need to change model name in classify-resnet.py
+./classify-resnet.py tomModels/ResNet-50.npy /home/yitao/Documents/TF-Serving-Downloads/dog.jpg
+./classify-resnet.py tomModels/ResNet-152.npy /home/yitao/Documents/TF-Serving-Downloads/dog.jpg
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_resnet50 --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_resnet50
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_resnet152 --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_resnet152
+bazel-bin/tensorflow_serving/example/caffe_resnet_client --server localhost:9000
 
