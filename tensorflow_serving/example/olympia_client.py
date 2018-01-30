@@ -92,32 +92,32 @@ def main(_):
   model_name_two = "caffe_googlenet"
   model_name_three = "caffe_resnet152"
 
-  batch_size = 100
+  batch_size = 200
   geneate_cost_model_run_num = 13
 
   generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_one)
-  generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_two)
+  # generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_two)
   generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_three)
 
 
-  # # for sr_info(0, 15) and sr_info(1, 15), we force them to overlap from beginning
-  # run_num_per_thread = 1
+  # for sr_info(0, 15) and sr_info(1, 15), we force them to overlap from beginning
+  run_num_per_thread = 1
 
-  # t_pool = []
-  # t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name_one)))
-  # t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name_three)))
+  t_pool = []
+  t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name_one)))
+  t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name_three)))
 
-  # start = time.time()
-  # t_pool[0].start()
-  # t_pool[1].start()
+  start = time.time()
+  t_pool[0].start()
+  t_pool[1].start()
 
-  # t_pool[0].join()
-  # t_pool[1].join()
+  t_pool[0].join()
+  t_pool[1].join()
 
-  # end = time.time()
+  end = time.time()
 
-  # print('\nFinished!')
-  # print("[Sum] the total running time for Inception and Caffe-ResNet is %s" % str(end - start))  
+  print('\nFinished!')
+  print("[Sum] the total running time for Inception and Caffe-ResNet is %s" % str(end - start))  
 
 if __name__ == '__main__':
   tf.app.run()
