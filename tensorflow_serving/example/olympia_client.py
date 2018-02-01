@@ -49,15 +49,16 @@ def generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_s
 
   print("For model %s cost model generation, it takes %s sec to run a batch of %d images over %d runs on avereage" % (model_name, str(duration_sum / (geneate_cost_model_run_num - 3)), batch_size, (geneate_cost_model_run_num - 3)))
 
-def run_model_in_parallel(stub, run_num_per_thread, batch_size, model_name):
+def run_model_in_parallel(stub, run_num_per_thread, batch_size, model_name, thread_id):
   request = predict_pb2.PredictRequest()
   request.model_spec.name = model_name
   request.model_spec.signature_name = 'predict_images'
 
-  if (model_name == "inception"):
-    folder_name = "000"
-  else:
-    folder_name = "001"
+  # if (model_name == "inception"):
+  #   folder_name = "000"
+  # else:
+  #   folder_name = "001"
+  folder_name = str(thread_id).zfill(3)
 
   duration_sum = 0.0
 
@@ -77,10 +78,10 @@ def run_model_in_parallel(stub, run_num_per_thread, batch_size, model_name):
     end = time.time()
 
     duration = (end - start)
-    print("it takes %s sec" % str(duration))
+    print("[%s-%d-%d] it takes %s sec" % (model_name, thread_id, i, str(duration)))
     duration_sum += duration
 
-  print("For model %s run in parallel, it takes %s sec to run a batch of %d images over %d runs on average" % (model_name, str(duration_sum), batch_size, run_num_per_thread))
+  print("For model %s-%d run in parallel, it takes %s sec to run a batch of %d images over %d runs on average" % (model_name, thread_id, str(duration_sum), batch_size, run_num_per_thread))
 
 
 def main(_):
@@ -89,35 +90,53 @@ def main(_):
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
 
   model_name_one = "inception"
-  model_name_two = "caffe_googlenet"
+  # model_name_two = "caffe_googlenet"
   model_name_three = "caffe_resnet152"
 
-  batch_size = 200
+  batch_size = 100
   geneate_cost_model_run_num = 13
 
   generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_one)
   # generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_two)
   generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_three)
 
+  time.sleep(1)
+  print("...5")
+  time.sleep(1)
+  print("...4")
+  time.sleep(1)
+  print("...3")
+  time.sleep(1)
+  print("...2")
+  time.sleep(1)
+  print("...1")
+  time.sleep(1)
+
 
   # for sr_info(0, 15) and sr_info(1, 15), we force them to overlap from beginning
-  run_num_per_thread = 1
+  run_num_per_thread = 10
+  client_per_model = 5
 
   t_pool = []
-  t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name_one)))
-  t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name_three)))
+  for i in range(client_per_model):
+    t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name_one, i)))
+    t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name_three, i + client_per_model)))
 
   start = time.time()
-  t_pool[0].start()
-  t_pool[1].start()
+  # t_pool[0].start()
+  # t_pool[1].start()
+  for t in t_pool:
+    t.start()
 
-  t_pool[0].join()
-  t_pool[1].join()
+  # t_pool[0].join()
+  # t_pool[1].join()
+  for t in t_pool:
+    t.join()
 
   end = time.time()
 
   print('\nFinished!')
-  print("[Sum] the total running time for Inception and Caffe-ResNet is %s" % str(end - start))  
+  print("[Sum] the total running time for %d Inception and %d Caffe-ResNet is %s" % (client_per_model, client_per_model, str(end - start)))
 
 if __name__ == '__main__':
   tf.app.run()
