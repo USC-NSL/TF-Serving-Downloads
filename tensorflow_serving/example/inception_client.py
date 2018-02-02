@@ -137,7 +137,7 @@ def myFuncParallel(stub, i):
 
   batchSize = 100
   durationSum = 0.0
-  runNum = 1
+  runNum = 10
 
   for k in range(runNum):
     image_data = []
@@ -150,7 +150,7 @@ def myFuncParallel(stub, i):
     request.inputs['images'].CopyFrom(
         tf.contrib.util.make_tensor_proto(image_data, shape=[len(image_data)]))
 
-    result = stub.Predict(request, 60.0)  # 10 secs timeout
+    result = stub.Predict(request, 60.0 + i * 10)  # 10 secs timeout
     # print(result)
     end = time.time()
     duration = (end - start)
@@ -185,7 +185,7 @@ def main(_):
   # print("...1")
   # time.sleep(1)
 
-  num_tests = 2
+  num_tests = 10
   tPool = []
   for i in range(num_tests):
     tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i)))
