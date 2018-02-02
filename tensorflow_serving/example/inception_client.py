@@ -137,7 +137,7 @@ def myFuncParallel(stub, i):
 
   batchSize = 100
   durationSum = 0.0
-  runNum = 10
+  runNum = 1
 
   for k in range(runNum):
     image_data = []
@@ -185,7 +185,7 @@ def main(_):
   # print("...1")
   # time.sleep(1)
 
-  num_tests = 10
+  num_tests = 2
   tPool = []
   for i in range(num_tests):
     tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i)))
