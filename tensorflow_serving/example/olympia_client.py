@@ -73,7 +73,7 @@ def run_model_in_parallel(stub, run_num_per_thread, batch_size, model_name, thre
         image_data.append(f.read())
     request.inputs['images'].CopyFrom(
         tf.contrib.util.make_tensor_proto(image_data, shape=[len(image_data)]))
-    result = stub.Predict(request, 60.0)
+    result = stub.Predict(request, 60.0 + thread_id * 10)
 
     end = time.time()
 
@@ -93,34 +93,37 @@ def main(_):
   # model_name_two = "caffe_googlenet"
   model_name_three = "caffe_resnet152"
 
-  batch_size = 100
+  batch_size_model_one = 100
+  # batch_size_model_two = 100
+  batch_size_model_three = 100
+
   geneate_cost_model_run_num = 13
 
-  generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_one)
+  generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size_model_one, model_name_one)
   # generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_two)
-  generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_three)
+  generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size_model_three, model_name_three)
 
-  time.sleep(1)
-  print("...5")
-  time.sleep(1)
-  print("...4")
-  time.sleep(1)
-  print("...3")
-  time.sleep(1)
-  print("...2")
-  time.sleep(1)
-  print("...1")
-  time.sleep(1)
+  # time.sleep(1)
+  # print("...5")
+  # time.sleep(1)
+  # print("...4")
+  # time.sleep(1)
+  # print("...3")
+  # time.sleep(1)
+  # print("...2")
+  # time.sleep(1)
+  # print("...1")
+  # time.sleep(1)
 
 
   # for sr_info(0, 15) and sr_info(1, 15), we force them to overlap from beginning
-  run_num_per_thread = 10
+  run_num_per_thread = 1
   client_per_model = 5
 
   t_pool = []
   for i in range(client_per_model):
-    t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name_one, i)))
-    t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name_three, i + client_per_model)))
+    t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size_model_one, model_name_one, i)))
+    t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size_model_three, model_name_three, i + client_per_model)))
 
   start = time.time()
   # t_pool[0].start()
