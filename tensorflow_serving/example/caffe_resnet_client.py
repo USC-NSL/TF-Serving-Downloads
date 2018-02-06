@@ -79,7 +79,7 @@ def myFuncParallel(stub, i):
 
   batchSize = 100
   durationSum = 0.0
-  runNum = 1
+  runNum = 10
 
   for k in range(runNum):
     image_data = []
@@ -115,7 +115,19 @@ def main(_):
   # run Inception job
   myFuncWarmUp(stub, 0)
 
-  num_tests = 0
+  time.sleep(1)
+  print("...5")
+  time.sleep(1)
+  print("...4")
+  time.sleep(1)
+  print("...3")
+  time.sleep(1)
+  print("...2")
+  time.sleep(1)
+  print("...1")
+  time.sleep(1)
+
+  num_tests = 10
   tPool = []
   for i in range(num_tests):
     tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i)))

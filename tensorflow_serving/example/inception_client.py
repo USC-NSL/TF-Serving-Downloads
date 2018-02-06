@@ -103,7 +103,7 @@ def myFuncWarmUp(stub, i):
   request.model_spec.name = 'inception'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 1
+  batchSize = 100
   durationSum = 0.0
   runNum = 13
 
@@ -111,8 +111,8 @@ def myFuncWarmUp(stub, i):
     image_data = []
     start = time.time()
     for j in range(batchSize):
-      # image = "/home/yitao/Downloads/inception-input/%s/dog-%s.jpg" % (str(i % 100).zfill(3), str(j).zfill(3))
-      image = "/home/yitao/Downloads/cat100.jpg"
+      image = "/home/yitao/Downloads/inception-input/%s/dog-%s.jpg" % (str(i % 100).zfill(3), str(j).zfill(3))
+      # image = "/home/yitao/Downloads/cat100.jpg"
       # image = "/home/yitao/Documents/TF-Serving-Downloads/cat.jpg"
       with open(image, 'rb') as f:
         image_data.append(f.read())
@@ -188,7 +188,7 @@ def main(_):
   # print("...1")
   # time.sleep(1)
 
-  num_tests = 0
+  num_tests = 10
   tPool = []
   for i in range(num_tests):
     tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i)))

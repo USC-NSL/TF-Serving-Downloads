@@ -117,7 +117,7 @@ def main(_):
 
 
   # for sr_info(0, 15) and sr_info(1, 15), we force them to overlap from beginning
-  run_num_per_thread = 1
+  run_num_per_thread = 10
   client_per_model = 5
 
   t_pool = []
