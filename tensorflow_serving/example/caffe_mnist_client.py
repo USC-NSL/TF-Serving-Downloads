@@ -27,6 +27,7 @@ Typical usage example:
 
 from __future__ import print_function
 
+import time
 import sys
 import threading
 
@@ -123,57 +124,155 @@ FLAGS = tf.app.flags.FLAGS
 #   return _callback
 
 
-def do_inference(hostport, work_dir, concurrency, num_tests):
-  """Tests PredictionService with concurrent requests.
+# def do_inference(hostport, work_dir, concurrency, num_tests):
+#   """Tests PredictionService with concurrent requests.
 
-  Args:
-    hostport: Host:port address of the PredictionService.
-    work_dir: The full path of working directory for test data set.
-    concurrency: Maximum number of concurrent requests.
-    num_tests: Number of test images to use.
+#   Args:
+#     hostport: Host:port address of the PredictionService.
+#     work_dir: The full path of working directory for test data set.
+#     concurrency: Maximum number of concurrent requests.
+#     num_tests: Number of test images to use.
 
-  Returns:
-    The classification error rate.
+#   Returns:
+#     The classification error rate.
 
-  Raises:
-    IOError: An error occurred processing test data set.
-  """
+#   Raises:
+#     IOError: An error occurred processing test data set.
+#   """
+#   test_data_set = mnist_input_data.read_data_sets(work_dir).test
+#   host, port = hostport.split(':')
+#   channel = implementations.insecure_channel(host, int(port))
+#   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
+
+#   start = time.time()
+#   for _ in range(num_tests):
+#     request = predict_pb2.PredictRequest()
+#     request.model_spec.name = 'caffe_mnist'
+#     request.model_spec.signature_name = 'predict_images'
+#     image, label = test_data_set.next_batch(5)
+#     # tmp_image, _ = test_data_set.next_batch(1)
+#     # image = np.reshape(tmp_image[0], (1, 28, 28, 1))
+#     # print("[Yitao] %s" % image[0].size)
+#     # print(image[0].shape)
+#     # print(image[0].dtype)
+#     # print(label.shape)
+#     # print(label.dtype)
+#     request.inputs['images'].CopyFrom(
+#         tf.contrib.util.make_tensor_proto(image[0], shape=[5, 28, 28, 1]))
+#     # print("Bangbangbang")
+#     tmp_result = stub.Predict(request, 10.0)  # 5 seconds
+#     # print(tmp_result)
+#     sys.stdout.write('.')
+#     sys.stdout.flush()
+
+#   end = time.time()
+#   print('\nFinished!')
+#   print('It takes %s sec to run %d images by using MNIST' % (str(end - start), num_tests))
+
+
+def myFuncWarmUp(stub, i, test_data_set):
+  request = predict_pb2.PredictRequest()
+  request.model_spec.name = 'caffe_mnist'
+  request.model_spec.signature_name = 'predict_images'
+
+  batchSize = 5000
+  durationSum = 0.0
+  runNum = 13
+
+  # test_data_set = mnist_input_data.read_data_sets(FLAGS.work_dir).test
+
+  for k in range(runNum):
+    start = time.time()
+
+    image, label = test_data_set.next_batch(batchSize)
+    request.inputs['images'].CopyFrom(
+        tf.contrib.util.make_tensor_proto(image[0], shape=[batchSize, 28, 28, 1]))
+
+    tmp_result = stub.Predict(request, 10.0)  # 5 seconds
+
+    end = time.time()
+    duration = (end - start)
+    print("it takes %s sec" % str(duration))
+
+    if (k != 0 and k != 3 and k != 8):
+      durationSum += duration
+
+  print("[Warm up] on average, it takes %s sec to run a batch of %d images over %d runs" % (str(durationSum / (runNum - 3)), batchSize, (runNum - 3)))
+
+def myFuncParallel(stub, i, test_data_set):
+  request = predict_pb2.PredictRequest()
+  request.model_spec.name = 'caffe_mnist'
+  request.model_spec.signature_name = 'predict_images'
+
+  batchSize = 5000
+  durationSum = 0.0
+  runNum = 10
+
+  # test_data_set = mnist_input_data.read_data_sets(FLAGS.work_dir).test
+
+  for k in range(runNum):
+    start = time.time()
+
+    image, label = test_data_set.next_batch(batchSize)
+    request.inputs['images'].CopyFrom(
+        tf.contrib.util.make_tensor_proto(image[0], shape=[batchSize, 28, 28, 1]))
+
+    tmp_result = stub.Predict(request, 10.0)  # 5 seconds
+
+    end = time.time()
+    duration = (end - start)
+    print("[thread-%d-%d] it takes %s sec" % (i, k, str(duration)))
+
+    if True:
+      durationSum += duration
+
+  print("[Parallel-thread-%d] on average, it takes %s sec to run a batch of %d images over %d runs" % (i, str(durationSum / runNum), batchSize, runNum))
+
+
+def main(_):
+  # if FLAGS.num_tests > 10000:
+  #   print('num_tests should not be greater than 10k')
+  #   return
+  # if not FLAGS.server:
+  #   print('please specify server host:port')
+  #   return
+  # do_inference(FLAGS.server, FLAGS.work_dir,
+  #                           FLAGS.concurrency, FLAGS.num_tests)
+
+
+  hostport = FLAGS.server
+  work_dir = FLAGS.work_dir
+  concurrency = FLAGS.concurrency
+  num_tests = FLAGS.num_tests
+
   test_data_set = mnist_input_data.read_data_sets(work_dir).test
+
   host, port = hostport.split(':')
   channel = implementations.insecure_channel(host, int(port))
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
 
-  for _ in range(num_tests):
-    request = predict_pb2.PredictRequest()
-    request.model_spec.name = 'caffe_mnist'
-    request.model_spec.signature_name = 'predict_images'
-    image, label = test_data_set.next_batch(1)
-    # tmp_image, _ = test_data_set.next_batch(1)
-    # image = np.reshape(tmp_image[0], (1, 28, 28, 1))
-    # print("[Yitao] %s" % image[0].size)
-    # print(image[0].shape)
-    # print(image[0].dtype)
-    # print(label.shape)
-    # print(label.dtype)
-    request.inputs['images'].CopyFrom(
-        tf.contrib.util.make_tensor_proto(image[0], shape=[1, 28, 28, 1]))
-    # print("Bangbangbang")
-    tmp_result = stub.Predict(request, 10.0)  # 5 seconds
-    sys.stdout.write('.')
-    sys.stdout.flush()
+  myFuncWarmUp(stub, 0, test_data_set)
+
+  num_tests = 10
+  tPool = []
+  for i in range(num_tests):
+    tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i, test_data_set)))
+
+  start = time.time()
+  for i in range(num_tests):
+    t = tPool[i]
+    t.start()
+    # time.sleep(2.0)
+
+  for i in range(num_tests):
+    t = tPool[i]
+    t.join()
+
+  end = time.time()
 
   print('\nFinished!')
+  print('[Parallel] The total running time to run %d concurrent jobs is %s' % (num_tests, str(end - start)))
 
-
-def main(_):
-  if FLAGS.num_tests > 10000:
-    print('num_tests should not be greater than 10k')
-    return
-  if not FLAGS.server:
-    print('please specify server host:port')
-    return
-  do_inference(FLAGS.server, FLAGS.work_dir,
-                            FLAGS.concurrency, FLAGS.num_tests)
 
 
 if __name__ == '__main__':

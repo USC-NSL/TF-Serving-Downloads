@@ -1,3 +1,12 @@
+==================================================================================================================================
+- Server:
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_config_file=tfserv.conf >debug-out/out001 2>&1
+
+- Client:
+bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
+
+==================================================================================================================================
+
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_name=inception --model_base_path=/home/yitao/Downloads/tmp/inception_model
 bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
 
@@ -101,7 +110,7 @@ cd Documents/fun-project/caffe-tensorflow
 ./convert.py examples/mnist/lenet.prototxt --caffemodel examples/mnist/lenet_iter_10000.caffemodel --data-output-path=mynet.npy
 python finetune_mnist.py
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_mnist --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/caffe_mnist
-bazel-bin/tensorflow_serving/example/caffe_mnist_client --num_tests=1000 --server localhost:9000
+bazel-bin/tensorflow_serving/example/caffe_mnist_client --server localhost:9000
 
 # For Caffe-GoogleNet example
 # https://github.com/sugartom/caffe-tensorflow/tree/master/examples/imagenet
@@ -129,4 +138,12 @@ bazel-bin/tensorflow_serving/example/caffe_googlenet_client --server localhost:9
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_resnet50 --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_resnet50
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_resnet152 --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_resnet152
 bazel-bin/tensorflow_serving/example/caffe_resnet_client --server localhost:9000
+
+# For VGG example
+git clone https://github.com/sugartom/tensorflow-vgg.git
+cd tensorflow-vgg
+python tom_test_vgg16.py
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=vgg_model --model_base_path=/home/yitao/Documents/fun-project/tensorflow-vgg/vgg_model
+bazel-bin/tensorflow_serving/example/vgg_client --server localhost:9000
+
 
