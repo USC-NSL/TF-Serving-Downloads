@@ -45,7 +45,7 @@ def myFuncWarmUp(stub, i):
   request.model_spec.name = 'caffe_resnet152'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 100
+  batchSize = 1
   durationSum = 0.0
   runNum = 13
 
@@ -77,7 +77,7 @@ def myFuncParallel(stub, i):
   request.model_spec.name = 'caffe_resnet152'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 100
+  batchSize = 1
   durationSum = 0.0
   runNum = 10
 
@@ -115,19 +115,19 @@ def main(_):
   # run Inception job
   myFuncWarmUp(stub, 0)
 
-  time.sleep(1)
-  print("...5")
-  time.sleep(1)
-  print("...4")
-  time.sleep(1)
-  print("...3")
-  time.sleep(1)
-  print("...2")
-  time.sleep(1)
-  print("...1")
-  time.sleep(1)
+  # time.sleep(1)
+  # print("...5")
+  # time.sleep(1)
+  # print("...4")
+  # time.sleep(1)
+  # print("...3")
+  # time.sleep(1)
+  # print("...2")
+  # time.sleep(1)
+  # print("...1")
+  # time.sleep(1)
 
-  num_tests = 10
+  num_tests = 0
   tPool = []
   for i in range(num_tests):
     tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i)))

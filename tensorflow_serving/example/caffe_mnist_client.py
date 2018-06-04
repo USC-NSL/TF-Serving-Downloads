@@ -175,7 +175,7 @@ def myFuncWarmUp(stub, i, test_data_set):
   request.model_spec.name = 'caffe_mnist'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 5000
+  batchSize = 1
   durationSum = 0.0
   runNum = 13
 
@@ -204,7 +204,7 @@ def myFuncParallel(stub, i, test_data_set):
   request.model_spec.name = 'caffe_mnist'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 5000
+  batchSize = 1
   durationSum = 0.0
   runNum = 10
 
@@ -253,7 +253,7 @@ def main(_):
 
   myFuncWarmUp(stub, 0, test_data_set)
 
-  num_tests = 10
+  num_tests = 0
   tPool = []
   for i in range(num_tests):
     tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i, test_data_set)))

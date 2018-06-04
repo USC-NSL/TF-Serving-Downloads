@@ -178,9 +178,9 @@ py_binary(
 )
 
 py_binary(
-    name = "olympia_client",
+    name = "olympian_client",
     srcs = [
-        "olympia_client.py",
+        "olympian_client.py",
     ],
     deps = [
         "//tensorflow_serving/apis:predict_proto_py_pb2",
@@ -205,6 +205,42 @@ py_binary(
     name = "vgg_client",
     srcs = [
         "vgg_client.py",
+    ],
+    deps = [
+        "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+    ],
+)
+
+py_binary(
+    name = "yolo_tiny_client",
+    srcs = [
+        "yolo_tiny_client.py",
+    ],
+    deps = [
+        "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+    ],
+)
+
+py_binary(
+    name = "new_olympian_client",
+    srcs = [
+        "new_olympian_client.py",
+    ],
+    deps = [
+        "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+    ],
+)
+
+py_binary(
+    name = "darkflow_yolo_client",
+    srcs = [
+        "darkflow_yolo_client.py",
     ],
     deps = [
         "//tensorflow_serving/apis:predict_proto_py_pb2",

@@ -1,9 +1,67 @@
 ==================================================================================================================================
-- Server:
-bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_config_file=tfserv.conf >debug-out/out001 2>&1
+* Server:
+  bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_config_file=tfserv.conf.middleware >debug-out/out-001 2>&1
+* Client:
+  bazel-bin/tensorflow_serving/example/new_olympian_client --server localhost:9000
 
-- Client:
-bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
+==================================================================================================================================
+
+* Server:
+  - Middleware
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_config_file=tfserv.conf.middleware >debug-out/out001 2>&1
+
+  - Inception and ResNet
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_config_file=tfserv.conf >debug-out/out001 2>&1
+
+  - GoogleNet
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_googlenet --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_googlenet >debug-out/out001 2>&1
+
+  - MNIST
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_mnist --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/caffe_mnist >debug-out/out001 2>&1
+
+  - VGG
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=vgg_model --model_base_path=/home/yitao/Documents/fun-project/tensorflow-vgg/vgg_model >debug-out/out001 2>&1
+
+  - YOLO-1
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=yolo_tiny_batch_001 --model_base_path=/home/yitao/Documents/fun-project/tensorflow-yolo/yolo_tiny_batch_001 >debug-out/out001 2>&1
+  - YOLO-32
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=yolo_tiny_batch_032 --model_base_path=/home/yitao/Documents/fun-project/tensorflow-yolo/yolo_tiny_batch_032 >debug-out/out001 2>&1
+  - YOLO-128
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=yolo_tiny_batch_128 --model_base_path=/home/yitao/Documents/fun-project/tensorflow-yolo/yolo_tiny_batch_128 >debug-out/out001 2>&1
+
+  - Darkflow
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=darkflow_yolo --model_base_path=/home/yitao/Documents/fun-project/darknet-repo/test/darkflow_yolo
+
+* Client:
+  - Inception and ResNet
+    bazel-bin/tensorflow_serving/example/olympia_client --server localhost:9000
+
+  - Inception
+    bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000
+
+  - ResNet
+    bazel-bin/tensorflow_serving/example/caffe_resnet_client --server localhost:9000
+
+  - GoogleNet
+    bazel-bin/tensorflow_serving/example/caffe_googlenet_client --server localhost:9000
+
+  - MNIST
+    bazel-bin/tensorflow_serving/example/caffe_mnist_client --server localhost:9000
+
+  - VGG
+    bazel-bin/tensorflow_serving/example/vgg_client --server localhost:9000
+
+  - YOLO
+    bazel-bin/tensorflow_serving/example/yolo_tiny_client --server localhost:9000
+
+  - AlexNet
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_alexnet --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_alexnet >debug-out/out001 2>&1
+
+  - caffe-VGG
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=caffe_vgg --model_base_path=/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_vgg >debug-out/out001 2>&1
+
+  - Darkflow
+    bazel-bin/tensorflow_serving/example/darkflow_yolo_client --server localhost:9000
 
 ==================================================================================================================================
 
@@ -131,6 +189,7 @@ bazel-bin/tensorflow_serving/example/caffe_googlenet_client --server localhost:9
 # For Caffe-ResNet example
 # Firstly, download prototxt and caffemodel files from Kaiming's website, then...
 ./convert.py examples/imagenet/tomModels/ResNet-50-deploy.prototxt --caffemodel examples/imagenet/tomModels/ResNet-50-model.caffemodel --data-output-path=examples/imagenet/tomModels/ResNet-50.npy
+./convert.py examples/imagenet/tomModels/ResNet-101-deploy.prototxt --caffemodel examples/imagenet/tomModels/ResNet-101-model.caffemodel --data-output-path=examples/imagenet/tomModels/ResNet-101.npy
 ./convert.py examples/imagenet/tomModels/ResNet-152-deploy.prototxt --caffemodel examples/imagenet/tomModels/ResNet-152-model.caffemodel --data-output-path=examples/imagenet/tomModels/ResNet-152.npy
 # !!! need to change model name in classify-resnet.py
 ./classify-resnet.py tomModels/ResNet-50.npy /home/yitao/Documents/TF-Serving-Downloads/dog.jpg

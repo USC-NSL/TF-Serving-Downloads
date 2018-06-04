@@ -81,7 +81,8 @@ def run_model_in_parallel(stub, run_num_per_thread, batch_size, model_name, thre
     print("[%s-%d-%d] it takes %s sec" % (model_name, thread_id, i, str(duration)))
     duration_sum += duration
 
-  print("For model %s-%d run in parallel, it takes %s sec to run a batch of %d images over %d runs on average" % (model_name, thread_id, str(duration_sum), batch_size, run_num_per_thread))
+  # print("For model %s-%d run in parallel, it takes %s sec to run a batch of %d images over %d runs on average" % (model_name, thread_id, str(duration_sum), batch_size, run_num_per_thread))
+
 
 
 def main(_):
@@ -89,19 +90,17 @@ def main(_):
   channel = implementations.insecure_channel(host, int(port))
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
 
-  model_name_one = "inception"
-  # model_name_two = "caffe_googlenet"
-  model_name_three = "caffe_resnet152"
-
-  batch_size_model_one = 100
-  # batch_size_model_two = 100
-  batch_size_model_three = 100
+  model_names = ["inception", "caffe_googlenet", "caffe_resnet50", "caffe_resnet101", "caffe_resnet152", "caffe_alexnet", "caffe_vgg"]
+  batch_sizes = [150, 200, 144, 128, 100, 256, 120]
+  # model_names = ["inception"]
+  # batch_sizes = [150]
 
   geneate_cost_model_run_num = 13
 
-  generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size_model_one, model_name_one)
-  # generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name_two)
-  generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size_model_three, model_name_three)
+  for i in range(len(model_names)):
+    model_name = model_names[i]
+    batch_size = batch_sizes[i]
+    generate_cost_model_for_this_model(stub, geneate_cost_model_run_num, batch_size, model_name)
 
   # time.sleep(1)
   # print("...5")
@@ -116,30 +115,52 @@ def main(_):
   # time.sleep(1)
 
 
-  # for sr_info(0, 15) and sr_info(1, 15), we force them to overlap from beginning
-  run_num_per_thread = 10
-  client_per_model = 5
+  # run_num_per_thread = 1
+  # client_per_model = 2
 
-  t_pool = []
-  for i in range(client_per_model):
-    t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size_model_one, model_name_one, i)))
-    t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size_model_three, model_name_three, i + client_per_model)))
+  # t_pool = []
+  # for i in range(client_per_model):
+  #   for j in range(len(model_names)):
+  #     model_name = model_names[j]
+  #     batch_size = batch_sizes[j]
+  #     t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name, i + client_per_model * j)))
 
-  start = time.time()
-  # t_pool[0].start()
-  # t_pool[1].start()
-  for t in t_pool:
-    t.start()
+  # start = time.time()
 
-  # t_pool[0].join()
-  # t_pool[1].join()
-  for t in t_pool:
-    t.join()
+  # for t in t_pool:
+  #   t.start()
 
-  end = time.time()
+  # for t in t_pool:
+  #   t.join()
 
-  print('\nFinished!')
-  print("[Sum] the total running time for %d Inception and %d Caffe-ResNet is %s" % (client_per_model, client_per_model, str(end - start)))
+  # end = time.time()
+
+  # print('\nFinished!')
+  # print("[Sum] the total running time for these %d CNNs is %s" % (len(model_names) * client_per_model, str(end - start)))
+
+
+
+
+  run_num_per_thread = 1
+  client_per_model = 2
+
+  for i in range(len(model_names)):
+    t_pool = []
+    model_name = model_names[i]
+    batch_size = batch_sizes[i]
+    for j in range(client_per_model):
+      t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name, i + client_per_model * j)))
+
+    start = time.time()
+
+    for t in t_pool:
+      t.start()
+    for t in t_pool:
+      t.join()
+
+    end = time.time()
+
+    print("The total running time to run two concurrent %s of batch size %d is %s" % (model_name, batch_size, str(end - start)))
 
 if __name__ == '__main__':
   tf.app.run()

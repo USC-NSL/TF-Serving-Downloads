@@ -90,7 +90,7 @@ def myFuncWarmUp(stub, i):
   request.model_spec.name = 'vgg_model'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 10
+  batchSize = 1
   durationSum = 0.0
   runNum = 13
 
