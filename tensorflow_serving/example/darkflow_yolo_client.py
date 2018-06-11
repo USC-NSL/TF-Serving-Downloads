@@ -33,6 +33,8 @@ import numpy as np
 
 from tensorflow.python.framework import tensor_util
 
+from darkflow.cython_utils.cy_yolo2_findboxes import box_constructor
+
 tf.app.flags.DEFINE_string('server', 'localhost:9000',
                            'PredictionService host:port')
 tf.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
@@ -44,6 +46,23 @@ def resize_input(im):
   imsz = imsz[:,:,::-1]
   return imsz
 
+def process_box(b, h, w, threshold, meta):
+  max_indx = np.argmax(b.probs)
+  max_prob = b.probs[max_indx]
+  label = meta['labels'][max_indx]
+  if max_prob > threshold:
+    left  = int ((b.x - b.w/2.) * w)
+    right = int ((b.x + b.w/2.) * w)
+    top   = int ((b.y - b.h/2.) * h)
+    bot   = int ((b.y + b.h/2.) * h)
+    if left  < 0    :  left = 0
+    if right > w - 1: right = w - 1
+    if top   < 0    :   top = 0
+    if bot   > h - 1:   bot = h - 1
+    mess = '{}'.format(label)
+    return (left, right, top, bot, mess, max_indx, max_prob)
+  return None
+
 def main(_):
   host, port = FLAGS.server.split(':')
   channel = implementations.insecure_channel(host, int(port))
@@ -53,9 +72,10 @@ def main(_):
     # See prediction_service.proto for gRPC request/response details.
   # data = f.read()
   # image_name = "/home/yitao/Documents/fun-project/darknet-repo/darkflow/sample_img/sample_person.jpg"
-  image_name = "/home/yitao/Documents/TF-Serving-Downloads/cat.jpg"
+  image_name = "/home/yitao/Documents/TF-Serving-Downloads/dog.jpg"
+  # image_name = "/home/yitao/Documents/TF-Serving-Downloads/cat.jpg"
   im = cv2.imread(image_name)
-  # h, w, _ = im.shape
+  h, w, _ = im.shape
   im = resize_input(im)
   this_inp = np.expand_dims(im, 0)
 
@@ -84,6 +104,39 @@ def main(_):
   print(tt.shape)
   print(tt[:,0,0])
   print(tt[:,0,1])
+
+  meta = {'labels': ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'sofa', 'pottedplant', 'bed', 'diningtable', 'toilet', 'tvmonitor', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'], u'jitter': 0.3, u'anchors': [0.57273, 0.677385, 1.87446, 2.06253, 3.33843, 5.47434, 7.88282, 3.52778, 9.77052, 9.16828], u'random': 1, 'colors': [(254, 254, 254), (254, 254, 127), (254, 254, 0), (254, 254, -127), (254, 254, -254), (254, 127, 254), (254, 127, 127), (254, 127, 0), (254, 127, -127), (254, 127, -254), (254, 0, 254), (254, 0, 127), (254, 0, 0), (254, 0, -127), (254, 0, -254), (254, -127, 254), (254, -127, 127), (254, -127, 0), (254, -127, -127), (254, -127, -254), (254, -254, 254), (254, -254, 127), (254, -254, 0), (254, -254, -127), (254, -254, -254), (127, 254, 254), (127, 254, 127), (127, 254, 0), (127, 254, -127), (127, 254, -254), (127, 127, 254), (127, 127, 127), (127, 127, 0), (127, 127, -127), (127, 127, -254), (127, 0, 254), (127, 0, 127), (127, 0, 0), (127, 0, -127), (127, 0, -254), (127, -127, 254), (127, -127, 127), (127, -127, 0), (127, -127, -127), (127, -127, -254), (127, -254, 254), (127, -254, 127), (127, -254, 0), (127, -254, -127), (127, -254, -254), (0, 254, 254), (0, 254, 127), (0, 254, 0), (0, 254, -127), (0, 254, -254), (0, 127, 254), (0, 127, 127), (0, 127, 0), (0, 127, -127), (0, 127, -254), (0, 0, 254), (0, 0, 127), (0, 0, 0), (0, 0, -127), (0, 0, -254), (0, -127, 254), (0, -127, 127), (0, -127, 0), (0, -127, -127), (0, -127, -254), (0, -254, 254), (0, -254, 127), (0, -254, 0), (0, -254, -127), (0, -254, -254), (-127, 254, 254), (-127, 254, 127), (-127, 254, 0), (-127, 254, -127), (-127, 254, -254)], u'num': 5, u'thresh': 0.1, 'inp_size': [608, 608, 3], u'bias_match': 1, 'out_size': [19, 19, 425], 'model': '/home/yitao/Documents/fun-project/darknet-repo/darkflow/cfg/yolo.cfg', u'absolute': 1, 'name': 'yolo', u'coord_scale': 1, u'rescore': 1, u'class_scale': 1, u'noobject_scale': 1, u'object_scale': 5, u'classes': 80, u'coords': 4, u'softmax': 1, 'net': {u'hue': 0.1, u'saturation': 1.5, u'angle': 0, u'decay': 0.0005, u'learning_rate': 0.001, u'scales': u'.1,.1', u'batch': 1, u'height': 608, u'channels': 3, u'width': 608, u'subdivisions': 1, u'burn_in': 1000, u'policy': u'steps', u'max_batches': 500200, u'steps': u'400000,450000', 'type': u'[net]', u'momentum': 0.9, u'exposure': 1.5}, 'type': u'[region]'}
+
+  boxes = list()
+  boxes = box_constructor(meta, tt)
+
+  # for box in boxes:
+    # print("(%s, %s, %s, %s) with class_num = %s, probs = %s" % (str(box.x), str(box.y), str(box.w), str(box.h), str(box.class_num), str(box.probs)))
+
+  # set threshold
+  threshold = 0.1
+
+  boxesInfo = list()
+  for box in boxes:
+    tmpBox = process_box(box, h, w, threshold, meta)
+    if tmpBox is None:
+      continue
+    boxesInfo.append({
+      "label": tmpBox[4],
+      "confidence": tmpBox[6],
+      "topleft": {
+        "x": tmpBox[0],
+        "y": tmpBox[2]},
+      "bottomright": {
+        "x": tmpBox[1],
+        "y": tmpBox[3]}
+      })
+
+  for res in boxesInfo:
+    print("%s (confidence: %s)" % (res['label'], str(res['confidence'])))
+    print("    topleft(%s, %s), botright(%s, %s)" % 
+        (res['topleft']['x'], res['topleft']['y'], 
+        res['bottomright']['x'], res['bottomright']['y']))
 
 
 if __name__ == '__main__':
