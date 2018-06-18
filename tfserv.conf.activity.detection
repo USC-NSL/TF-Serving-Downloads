@@ -1,0 +1,12 @@
+model_config_list: {
+  config: {
+    name: "darkflow_yolo",
+    base_path: "/home/yitao/Documents/fun-project/darknet-repo/test/darkflow_yolo",
+    model_platform: "tensorflow"
+  },
+  config: {
+    name: "c3d_tensorflow",
+    base_path: "/home/yitao/Documents/fun-project/fromXiaochen/c3d_tensorflow",
+    model_platform: "tensorflow"
+  }
+}
