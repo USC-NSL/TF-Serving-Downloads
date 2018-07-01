@@ -248,3 +248,33 @@ py_binary(
         "@org_tensorflow//tensorflow:tensorflow_py",
     ],
 )
+
+py_binary(
+    name = "inception_client_new",
+    srcs = [
+        "inception_client_new.py",
+    ],
+    deps = [
+        "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+    ],
+)
+
+py_binary(
+    name = "tom_inception",
+    srcs = [
+        "tom_inception.py",
+    ],
+    deps = [
+        "@inception_model//inception",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+        "@org_tensorflow//tensorflow/python/saved_model:builder",
+        "@org_tensorflow//tensorflow/python/saved_model:constants",
+        "@org_tensorflow//tensorflow/python/saved_model:loader",
+        "@org_tensorflow//tensorflow/python/saved_model:signature_constants",
+        "@org_tensorflow//tensorflow/python/saved_model:signature_def_utils",
+        "@org_tensorflow//tensorflow/python/saved_model:tag_constants",
+        "@org_tensorflow//tensorflow/python/saved_model:utils",
+    ],
+)

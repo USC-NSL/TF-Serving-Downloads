@@ -1,3 +1,11 @@
+new
+- darkflow
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=darkflow_yolo --model_base_path=/home/yitao/Documents/fun-project/darknet-repo/test/darkflow_yolo >out-001 2>&1
+bazel-bin/tensorflow_serving/example/darkflow_yolo_client --server localhost:9000
+
+- inception
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=inception --model_base_path=/tmp/inception_output >out-001 2>&1
+bazel-bin/tensorflow_serving/example/inception_client_new --server localhost:9000 --image dog.jpg
 ==================================================================================================================================
 * Server:
   bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_config_file=tfserv.conf.middleware >debug-out/out-001 2>&1

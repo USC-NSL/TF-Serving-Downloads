@@ -251,6 +251,9 @@ Status SavedModelPredict(const RunOptions& run_options, ServerCore* core,
   const string signature_name = request.model_spec().signature_name().empty()
                                     ? kDefaultServingSignatureDefKey
                                     : request.model_spec().signature_name();
+
+  // LOG(INFO) << "[Yitao] signature_name = " << signature_name;
+
   auto iter = bundle->meta_graph_def.signature_def().find(signature_name);
   if (iter == bundle->meta_graph_def.signature_def().end()) {
     return errors::FailedPrecondition(
@@ -264,6 +267,11 @@ Status SavedModelPredict(const RunOptions& run_options, ServerCore* core,
   TF_RETURN_IF_ERROR(PreProcessPrediction(signature, request, &input_tensors,
                                           &output_tensor_names,
                                           &output_tensor_aliases));
+
+  // for (auto input_tensor : input_tensors) {
+  //   LOG(INFO) << "[Yitao] we have input_tensor.first = " << input_tensor.first;
+  // }
+
   std::vector<Tensor> outputs;
   RunMetadata run_metadata;
   TF_RETURN_IF_ERROR(bundle->session->Run(run_options, input_tensors,

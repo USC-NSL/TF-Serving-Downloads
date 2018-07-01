@@ -49,6 +49,13 @@ limitations under the License.
 #include <utility>
 #include <vector>
 
+#include <chrono>
+#include <iomanip>
+using namespace std;
+using ns = chrono::nanoseconds;
+using ms = chrono::milliseconds;
+using get_time = chrono::steady_clock;
+
 #include "google/protobuf/wrappers.pb.h"
 #include "grpc++/security/server_credentials.h"
 #include "grpc++/server.h"
@@ -204,6 +211,8 @@ class PredictionServiceImpl final : public PredictionService::Service {
                        PredictResponse* response) override {
 
     LOG(INFO) << "[Yitao] *** Predict() is called! ***";
+    auto start = get_time::now();
+    LOG(INFO) << "[Yitao] start Predict(), fractional_seconds_since_epoch = " << std::fixed << std::setprecision(2) << std::chrono::duration_cast<std::chrono::duration<double>>( std::chrono::system_clock::now().time_since_epoch()).count();
     
     // This is for my dumb dynamically load/remove a new model
     // By changing the list of models in the tfserv.conf file,
@@ -228,6 +237,21 @@ class PredictionServiceImpl final : public PredictionService::Service {
     if (!status.ok()) {
       VLOG(1) << "Predict failed: " << status.error_message();
     }
+
+    LOG(INFO) << "[Yitao] finish Predict(), fractional_seconds_since_epoch = " << std::fixed << std::setprecision(2) << std::chrono::duration_cast<std::chrono::duration<double>>( std::chrono::system_clock::now().time_since_epoch()).count();
+    auto end = get_time::now();
+    auto diff = end - start;
+    LOG(INFO) << "[Yitao] time to run grpc::Status Predict() = " << chrono::duration_cast<ms>(diff).count()<<" ms!";
+
+    // LOG(INFO) << "[Yitao] PredictResponse->mutable_outputs().dtype = " << (*response->mutable_outputs())["output"].dtype();
+    // auto tmp = (*response->mutable_outputs())["output"].tensor_shape();
+    // for (int i = 0; i < tmp.dim_size(); i++) {
+    //   LOG(INFO) << "[Yitao]    dim(" << i << ") = " << tmp.dim(i).size() << ", " << tmp.dim(i).name();
+    // }
+    // for (int i = 0; i < 10; i++) {
+    //   LOG(INFO) << "[Yitao]    float_val(" << i << ") = " << (*response->mutable_outputs())["output"].float_val(i);
+    // }
+
     return status;
   }
 
