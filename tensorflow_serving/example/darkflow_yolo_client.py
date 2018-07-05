@@ -67,7 +67,7 @@ def process_box(b, h, w, threshold, meta):
 
 def main(_):
   host, port = FLAGS.server.split(':')
-  
+
   channel = grpc.insecure_channel("%s:%s" % (host, port))
   stub = prediction_service_pb2.PredictionServiceStub(channel)
 
@@ -84,16 +84,16 @@ def main(_):
   # data = f.read()
   # image_name = "/home/yitao/Documents/fun-project/darknet-repo/darkflow/sample_img/sample_person.jpg"
   # image_name = "/home/yitao/Documents/TF-Serving-Downloads/dog.jpg"
-  image_name = "/home/yitao/Documents/TF-Serving-Downloads/cat.jpg"
+  image_name = "/home/yitao/Documents/TF-Serving-Downloads/dog.jpg"
   
-  iteration_list = [5]
+  iteration_list = [15, 1, 10]
   # iteration_list = [15, 1, 10, 20, 40, 80, 160, 320]
   for iteration in iteration_list:
     start = time.time()
     for i in range(iteration):
       im = cv2.imread(image_name)
 
-      print("[%s] start pre-processing" % str(time.time()))
+      # print("[%s] start pre-processing" % str(time.time()))
 
       h, w, _ = im.shape
       im = resize_input(im)
@@ -112,11 +112,11 @@ def main(_):
 
       # print(request.inputs['input'].tensor_shape)
 
-      print("[%s] start processing" % str(time.time()))
+      # print("[%s] start processing" % str(time.time()))
 
       result = stub.Predict(request, 10.0)  # 10 secs timeout
 
-      print("[%s] start post-processing" % str(time.time()))
+      # print("[%s] start post-processing" % str(time.time()))
 
       # print(result.outputs['output'])
       tmp = result.outputs['output']
@@ -154,7 +154,7 @@ def main(_):
             "y": tmpBox[3]}
           })
 
-      print("[%s] finished post-processing" % str(time.time()))
+      # print("[%s] finished post-processing" % str(time.time()))
 
       # for res in boxesInfo:
       #   print("%s (confidence: %s)" % (res['label'], str(res['confidence'])))
