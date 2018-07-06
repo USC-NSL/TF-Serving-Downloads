@@ -19,3 +19,4 @@ inception-input/*.jpg
 inception-input
 debug-out/*
 out-*
+tmp.txt
