@@ -1,7 +1,7 @@
 model_config_list: {
   config: {
     name: "devicehive_yolo",
-    base_path: "/home/yitao/Documents/fun-project/devicehive-video-analysis/devicehive_yolo",
+    base_path: "/home/yitao/Documents/fun-project/devicehive-video-analysis/devicehive_yolo_do_need_preprocess",
     model_platform: "tensorflow"
   },
   config: {

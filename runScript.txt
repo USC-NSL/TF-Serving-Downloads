@@ -222,8 +222,11 @@ bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 -
 bazel-bin/tensorflow_serving/example/vgg_client --server localhost:9000
 
 # For DeviceHive YOLO
+cd /home/yitao/Documents/fun-project/devicehive-yolo/yolo_ckpt
+or
+cd /home/yitao/Downloads/test/20180709/flow_yolo_ckpt
 flow --model /home/yitao/Documents/fun-project/darknet-repo/darkflow/cfg/yolo.cfg --load /home/yitao/Documents/fun-project/darknet-repo/darkflow/bin/yolo.weights --gpu 0.8 --threshold 0.25 --saveckpt
 Then change devicehive-video-analysis/models/yolo.py's _checkpoint_path = above checkpoint's pwd
 python eval_test.py -> devicehive_yolo (TF-Serving loadable exported model)
-bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=devicehive_yolo --model_base_path=/home/yitao/Documents/fun-project/devicehive-video-analysis/devicehive_yolo >out-001 2>&1
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=devicehive_yolo --model_base_path=/home/yitao/Documents/fun-project/devicehive-video-analysis/devicehive_yolo_do_need_preprocess >out-001 2>&1
 bazel-bin/tensorflow_serving/example/devicehive_yolo_client --server localhost:9000
