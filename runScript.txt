@@ -12,7 +12,7 @@ bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 -
 bazel-bin/tensorflow_serving/example/inception_client_new --server localhost:9000 --image dog.jpg
 
 - devicehive_yolo
-bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=devicehive_yolo --model_base_path=/home/yitao/Documents/fun-project/devicehive-video-analysis/devicehive_yolo >out-001 2>&1
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=devicehive_yolo --model_base_path=/home/yitao/Documents/fun-project/devicehive-video-analysis/devicehive_yolo_do_need_preprocess >out-001 2>&1
 bazel-bin/tensorflow_serving/example/devicehive_yolo_client --server localhost:9000
 ==================================================================================================================================
 * Server:
@@ -230,3 +230,7 @@ Then change devicehive-video-analysis/models/yolo.py's _checkpoint_path = above 
 python eval_test.py -> devicehive_yolo (TF-Serving loadable exported model)
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=devicehive_yolo --model_base_path=/home/yitao/Documents/fun-project/devicehive-video-analysis/devicehive_yolo_do_need_preprocess >out-001 2>&1
 bazel-bin/tensorflow_serving/example/devicehive_yolo_client --server localhost:9000
+
+# For tf-openpose
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=tf_openpose --model_base_path=/home/yitao/Documents/fun-project/tf-pose-estimation/tf_openpose
+bazel-bin/tensorflow_serving/example/tf_openpose_client --server localhost:9000
