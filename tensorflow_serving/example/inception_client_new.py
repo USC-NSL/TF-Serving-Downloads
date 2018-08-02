@@ -61,7 +61,7 @@ def main(_):
   request.model_spec.name = 'inception'
   request.model_spec.signature_name = 'predict_images'
   
-  iteration_list = [15, 10]
+  iteration_list = [1]
   for iteration in iteration_list:
     start = time.time()
     for i in range(iteration):
@@ -72,7 +72,7 @@ def main(_):
         request.inputs['images'].CopyFrom(
             tf.contrib.util.make_tensor_proto(data, shape=[1]))
         result = stub.Predict(request, 10.0)  # 10 secs timeout
-        # print(result)
+        print(result)
 
     end = time.time()
 

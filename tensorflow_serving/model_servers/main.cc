@@ -43,6 +43,8 @@ limitations under the License.
 // To enable batching (default disabled): --enable_batching
 // To override the default batching parameters: --batching_parameters_file
 
+// #include <stdlib.h>  
+
 #include <unistd.h>
 #include <iostream>
 #include <memory>
@@ -205,7 +207,11 @@ class PredictionServiceImpl final : public PredictionService::Service {
                                  bool use_saved_model)
       : core_(std::move(core)),
         predictor_(new TensorflowPredictor(use_saved_model)),
-        use_saved_model_(use_saved_model) {tmp_first_time_ = true;}
+        use_saved_model_(use_saved_model) {
+    
+    tmp_first_time_ = true;
+    // predict_count_ = 0;
+  }
 
   grpc::Status Predict(ServerContext* context, const PredictRequest* request,
                        PredictResponse* response) override {
@@ -227,6 +233,13 @@ class PredictionServiceImpl final : public PredictionService::Service {
      //   LOG(INFO) << "[Yitao] @@@@@@ Temp solution, we finish to ReloadConfig()! @@@@@@";
      // }
      // tmp_first_time_ = false;
+
+    // predict_count_ += 1;
+    // if (predict_count_ == 3) {
+    //   LOG(INFO) << "[Yitao] @@@@@@ Temp solution, we manually set CUDA_VISIBLE_DEVICES as empty to force CPU-only computation! @@@@@@";
+    //   setenv("CUDA_VISIBLE_DEVICES", "", 0);
+    //   tmp_first_time_ = false;
+    // }
 
     tensorflow::RunOptions run_options = tensorflow::RunOptions();
     // By default, this is infinite which is the same default as RunOptions.
@@ -327,6 +340,7 @@ class PredictionServiceImpl final : public PredictionService::Service {
   std::unique_ptr<TensorflowPredictor> predictor_;
   bool use_saved_model_;
   bool tmp_first_time_;
+  // int predict_count_;
 };
 
 void RunServer(int port, std::unique_ptr<ServerCore> core,
@@ -475,6 +489,9 @@ int main(int argc, char** argv) {
           << "You supplied --batching_parameters_file without "
              "--enable_batching";
     }
+
+    // session_bundle_config.mutable_session_config()->mutable_gpu_options()
+    //     ->set_per_process_gpu_memory_fraction(0.5);
 
     session_bundle_config.mutable_session_config()
         ->set_intra_op_parallelism_threads(tensorflow_session_parallelism);
