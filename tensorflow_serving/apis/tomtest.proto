@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package tensorflow.serving;
+option cc_enable_arenas = true;
+
+import "tensorflow/core/framework/tensor.proto";
+import "tensorflow_serving/apis/model.proto";
+
+message OlympianRequest {
+  string input_path = 1;
+}
+
+message OlympianReply {
+  string output_message = 1;
+}
+
+service OlympianMaster {
+  rpc CallTest(OlympianRequest) returns (OlympianReply) {}
+}

@@ -109,6 +109,28 @@ serving_proto_library_py(
 )
 
 serving_proto_library(
+    name = "tomtest_proto",
+    srcs = ["tomtest.proto"],
+    cc_api_version = 2,
+    go_api_version = 2,
+    java_api_version = 2,
+    deps = [
+        ":model_proto",
+        "@org_tensorflow//tensorflow/core:protos_all_cc",
+    ],
+)
+
+serving_proto_library_py(
+    name = "tomtest_proto_py_pb2",
+    srcs = ["tomtest.proto"],
+    proto_library = "tomtest_proto",
+    deps = [
+        ":model_proto_py_pb2",
+        "@org_tensorflow//tensorflow/core:protos_all_py",
+    ],
+)
+
+serving_proto_library(
     name = "prediction_service_proto",
     srcs = ["prediction_service.proto"],
     has_services = 1,
@@ -128,6 +150,18 @@ serving_proto_library(
 py_library(
     name = "prediction_service_proto_py_pb2",
     srcs = ["prediction_service_pb2.py"],
+    deps = [
+        ":classification_proto_py_pb2",
+        ":get_model_metadata_proto_py_pb2",
+        ":inference_proto_py_pb2",
+        ":predict_proto_py_pb2",
+        ":regression_proto_py_pb2",
+    ],
+)
+
+py_library(
+    name = "tomtest_grpc_proto_py_pb2",
+    srcs = ["tomtest_grpc_pb2.py"],
     deps = [
         ":classification_proto_py_pb2",
         ":get_model_metadata_proto_py_pb2",

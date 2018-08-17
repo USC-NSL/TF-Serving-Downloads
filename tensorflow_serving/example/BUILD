@@ -302,3 +302,31 @@ py_binary(
         "@org_tensorflow//tensorflow:tensorflow_py",
     ],
 )
+
+py_binary(
+    name = "inception_client_master_version",
+    srcs = [
+        "inception_client_master_version.py",
+    ],
+    deps = [
+        "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:tomtest_proto_py_pb2",
+        "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "//tensorflow_serving/apis:tomtest_grpc_proto_py_pb2",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+    ],
+)
+
+py_binary(
+    name = "inception_client_client_version",
+    srcs = [
+        "inception_client_client_version.py",
+    ],
+    deps = [
+        "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:tomtest_proto_py_pb2",
+        "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "//tensorflow_serving/apis:tomtest_grpc_proto_py_pb2",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+    ],
+)
