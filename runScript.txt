@@ -234,3 +234,7 @@ bazel-bin/tensorflow_serving/example/devicehive_yolo_client --server localhost:9
 # For tf-openpose
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=tf_openpose --model_base_path=/home/yitao/Documents/fun-project/tf-pose-estimation/tf_openpose
 bazel-bin/tensorflow_serving/example/tf_openpose_client --server localhost:9000
+
+# For olympian_master.proto
+python -m grpc.tools.protoc --python_out=. --grpc_python_out=. -I.:./tensorflow tensorflow_serving/apis/olympian_master.proto
+mv olympian_master_pb2_grpc.py olympian_master_grpc_pb2.py

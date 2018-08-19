@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package tensorflow.serving;
+option cc_enable_arenas = true;
+
+import "tensorflow/core/framework/tensor.proto";
+import "tensorflow_serving/apis/model.proto";
+import "tensorflow_serving/apis/predict.proto";
+
+service OlympianMaster {
+  rpc Predict(PredictRequest) returns (PredictResponse);
+}
