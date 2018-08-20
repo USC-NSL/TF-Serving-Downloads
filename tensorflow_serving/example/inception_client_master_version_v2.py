@@ -59,12 +59,14 @@ from concurrent import futures
 import grpc
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
+MAX_MESSAGE_LENGTH = 1024 * 1024 * 8
 
 class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
   # def callServer(input_path):
   #   # host, port = FLAGS.server.split(':')
 
   def Predict(self, request, context):
+    print("Master receved request for model %s" % request.model_spec.name)
     host = "localhost"
     port = "9000"
     channel = implementations.insecure_channel(host, int(port))
@@ -130,7 +132,9 @@ def main(_):
   #   print("It takes %s sec to run %d images for Inception" % (str(end - start), iteration))
   
 
-  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+  server = grpc.server(futures.ThreadPoolExecutor(max_workers=10), options=[('grpc.max_send_message_length', MAX_MESSAGE_LENGTH), 
+                                                                    ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH),
+                                                                    ('grpc.max_message_length', MAX_MESSAGE_LENGTH)])
   olympian_master_grpc_pb2.add_OlympianMasterServicer_to_server(OlympianMaster(), server)
   server.add_insecure_port('[::]:50051')
   server.start()
