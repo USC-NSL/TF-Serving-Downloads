@@ -358,3 +358,15 @@ py_binary(
         "@org_tensorflow//tensorflow:tensorflow_py",
     ],
 )
+
+py_binary(
+    name = "nvidia_autopilot_client",
+    srcs = [
+        "nvidia_autopilot_client.py",
+    ],
+    deps = [
+        "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+    ],
+)

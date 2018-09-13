@@ -14,6 +14,10 @@ bazel-bin/tensorflow_serving/example/inception_client_new --server localhost:900
 - devicehive_yolo
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=devicehive_yolo --model_base_path=/home/yitao/Documents/fun-project/devicehive-video-analysis/devicehive_yolo_do_need_preprocess >out-001 2>&1
 bazel-bin/tensorflow_serving/example/devicehive_yolo_client --server localhost:9000
+
+- nvidia_autopilot
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=nvidia_autopilot --model_base_path=/home/yitao/Documents/fun-project/tensorflow-related/Autopilot-TensorFlow/nvidia_autopilot >out-001 2>&1
+bazel-bin/tensorflow_serving/example/nvidia_autopilot_client
 ==================================================================================================================================
 * Server:
   bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --enable_batching --batching_parameters_file=batching_config.txt --port=9000 --model_config_file=tfserv.conf.middleware >debug-out/out-001 2>&1
