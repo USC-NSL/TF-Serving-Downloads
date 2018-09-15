@@ -32,11 +32,15 @@ import cv2
 import numpy as np
 import time
 
+from scipy.misc import imread
+
 tf.app.flags.DEFINE_string('server', 'localhost:9000',
                            'PredictionService host:port')
 tf.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
 FLAGS = tf.app.flags.FLAGS
 
+def data_to_input(data):
+    return np.expand_dims(data, axis=0).astype(float)
 
 def main(_):
   host, port = FLAGS.server.split(':')
@@ -44,11 +48,12 @@ def main(_):
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
 
   request = predict_pb2.PredictRequest()
-  request.model_spec.name = 'tf_openpose'
+  request.model_spec.name = 'pose_tensorflow'
   request.model_spec.signature_name = 'predict_images'
 
-  image_name = "/home/yitao/Documents/fun-project/tf-pose-estimation/images/p1.jpg"
-  my_upsample_size = [116, 108]
+  # image_name = "/home/yitao/Documents/fun-project/tf-pose-estimation/images/p1.jpg"
+  file_name = "/home/yitao/Documents/fun-project/tensorflow-related/pose-tensorflow/demo/image.png"
+
 
   iteration_list = [15, 1, 10]
   for iteration in iteration_list:
@@ -57,15 +62,11 @@ def main(_):
 
       print("[%s] start pre-processing" % str(time.time()))
 
-      data = cv2.imread(image_name, cv2.IMREAD_COLOR)
-      data = np.expand_dims(data, 0)
+      image = imread(file_name, mode='RGB')
+      data = data_to_input(image)
 
-      # print(data.shape)
-
-      request.inputs['tensor_image'].CopyFrom(
+      request.inputs['tensor_inputs'].CopyFrom(
         tf.contrib.util.make_tensor_proto(data, dtype = np.float32, shape=data.shape))
-      request.inputs['upsample_size'].CopyFrom(
-        tf.contrib.util.make_tensor_proto(my_upsample_size))
 
       print("[%s] start processing" % str(time.time()))
 
@@ -73,14 +74,8 @@ def main(_):
 
       print("[%s] finish processing" % str(time.time()))
 
-      # tensor_peaks = result.outputs["tensor_peaks"]
-      # tensor_heatMat_up = result.outputs["tensor_heatMat_up"]
-      # tensor_pafMat_up = result.outputs["tensor_pafMat_up"]
-
-      # print(tensor_peaks.tensor_shape.dim)
-      # print(tensor_heatMat_up.tensor_shape.dim)
-      # print(tensor_pafMat_up.tensor_shape.dim)
-      print(tensor_peaks.float_val[238013: 238031])
+      tensor_locref = result.outputs["tensor_locref"]
+      # print(tensor_locref.float_val[64484:64512])
 
     end = time.time()
     print("It takes %s sec to run %d images for tf-openpose" % (str(end - start), iteration))
