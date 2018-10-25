@@ -82,7 +82,7 @@ def runBatch():
   request.model_spec.name = 'inception'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 128
+  batchSize = 100
   image = "/home/yitao/Documents/TF-Serving-Downloads/dog.jpg"
 
   iteration_list = [2]

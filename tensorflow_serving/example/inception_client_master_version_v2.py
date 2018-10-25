@@ -95,7 +95,7 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
     newrequest = predict_pb2.PredictRequest()
     newrequest.model_spec.name = request.model_spec.name
     newrequest.model_spec.signature_name = request.model_spec.signature_name
-    newrequest.inputs['images'].CopyFrom(tf.contrib.util.make_tensor_proto(tensor_util.MakeNdarray(request.inputs['images'])[:new_request_shape_list[0]], shape=[new_request_shape_list[0]]))
+    newrequest.inputs['images'].CopyFrom(tf.contrib.util.make_tensor_proto(tensor_util.MakeNdarray(request.inputs['images'])[:new_request_shape_list[0]], shape=new_request_shape_list))
     # newrequest.inputs['images'] = request.inputs['images']
 
     result = stub.Predict(newrequest, 10.0)
