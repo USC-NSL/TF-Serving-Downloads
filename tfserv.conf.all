@@ -1,0 +1,47 @@
+model_config_list: {
+  config: {
+    name: "inception",
+    base_path: "/home/yitao/Downloads/tmp/inception_model",
+    model_platform: "tensorflow"
+  },
+  config: {
+    name: "caffe_resnet152",
+    base_path: "/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_resnet152",
+    model_platform: "tensorflow"
+  },
+  config: {
+    name: "caffe_resnet101",
+    base_path: "/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_resnet101",
+    model_platform: "tensorflow"
+  },
+  config: {
+    name: "caffe_resnet50",
+    base_path: "/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_resnet50",
+    model_platform: "tensorflow"
+  },
+  config: {
+    name: "caffe_googlenet",
+    base_path: "/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_googlenet",
+    model_platform: "tensorflow"
+  },
+  config: {
+    name: "caffe_alexnet",
+    base_path: "/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_alexnet",
+    model_platform: "tensorflow"
+  },
+  config: {
+    name: "caffe_vgg",
+    base_path: "/home/yitao/Documents/fun-project/caffe-tensorflow/examples/imagenet/caffe_vgg",
+    model_platform: "tensorflow"
+  },
+  config: {
+    name: "devicehive_yolo",
+    base_path: "/home/yitao/Documents/fun-project/devicehive-video-analysis/devicehive_yolo_do_need_preprocess",
+    model_platform: "tensorflow"
+  },
+  config: {
+    name: "c3d_tensorflow",
+    base_path: "/home/yitao/Documents/fun-project/fromXiaochen/c3d_tensorflow",
+    model_platform: "tensorflow"
+  }
+}

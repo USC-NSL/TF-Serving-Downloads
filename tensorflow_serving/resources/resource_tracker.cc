@@ -69,6 +69,13 @@ Status ResourceTracker::ReserveResources(const Loader& servable,
 
 Status ResourceTracker::RecomputeUsedResources(
     const std::vector<const Loader*>& servables) {
+
+  LOG(INFO) << "[Yitao] ResourceTracker::RecomputeUsedResources() is called...!!!";
+  // uint64 tmpTotalQuantity = total_resources_.resource_quantities(0).quantity();
+  // LOG(INFO) << "[Yitao] In total, there are " << tmpTotalQuantity << " resources!";
+  // // LOG(INFO) << "[Yitao] resource_quantities_size = " << total_resources_.resource_quantities_size();
+  LOG(INFO) << "[Yitao] total_resources_.DebugString() = " << total_resources_.DebugString();
+
   used_resources_.Clear();
   for (const Loader* servable : servables) {
     ResourceAllocation servable_resources;
@@ -76,6 +83,17 @@ Status ResourceTracker::RecomputeUsedResources(
     TF_RETURN_IF_ERROR(util_->VerifyValidity(servable_resources));
     util_->Add(servable_resources, &used_resources_);
   }
+
+  // // LOG(INFO) << "[Yitao] there are " << used_resources_.mutable_resource_quantities()->size() << " different resources in current machine!";
+  // auto tmpResourceQuantities = used_resources_.mutable_resource_quantities();
+  // for (int i = 0; i < tmpResourceQuantities->size(); i++) {
+  //   string device = tmpResourceQuantities->Mutable(i)->mutable_resource()->device();
+  //   // uint32 device_instance = tmpResourceQuantities->Mutable(i)->mutable_resource()->device_instance();
+  //   string kind = tmpResourceQuantities->Mutable(i)->mutable_resource()->kind();
+  //   uint64 quantity = tmpResourceQuantities->Mutable(i)->quantity();
+  //   LOG(INFO) << "[Yitao] have used " << quantity << " of device = " << device << " kind = " << kind;
+  // }
+
   return Status::OK();
 }
 

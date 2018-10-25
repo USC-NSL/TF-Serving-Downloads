@@ -17,6 +17,8 @@ import numpy
 import tensorflow as tf
 from datetime import datetime 
 
+from tensorflow.python.framework import tensor_util
+
 from tensorflow_serving.apis import predict_pb2
 from tensorflow_serving.apis import prediction_service_pb2
 
@@ -41,14 +43,19 @@ def do_inference(hostport):
   request.model_spec.signature_name = 'prediction'
 
   # Randomly generate some test data 
-  temp_data = numpy.random.randn(100, 3).astype(numpy.float32)
+  temp_data = numpy.random.randn(10, 3).astype(numpy.float32)
   data, label = temp_data, numpy.sum(temp_data * numpy.array([1,2,3]).astype(numpy.float32), 1)
   request.inputs['input'].CopyFrom(
       tf.contrib.util.make_tensor_proto(data, shape=data.shape))
 
+  # print(request.inputs['input'].dtype)
+  print(request.inputs['input'])
+  print(tensor_util.MakeNdarray(request.inputs['input']))
+
   # make inference and clock the time 
   now = datetime.now()
-  result = stub.Predict(request, 5.0)  # 5 seconds
+  for i in range(13):
+    result = stub.Predict(request, 5.0)  # 5 seconds
   waiting = datetime.now() - now
   return result, label, waiting.microseconds
 
@@ -59,9 +66,9 @@ def main(_):
       return
 
   result, label, waiting = do_inference(FLAGS.server)
-  print('Result is: ', result)
-  print('Actual label is: ', label)
-  print('Waiting time is: ', waiting, 'microseconds.')
+  # print('Result is: ', result)
+  # print('Actual label is: ', label)
+  # print('Waiting time is: ', waiting, 'microseconds.')
 
 if __name__ == '__main__':
   tf.app.run()

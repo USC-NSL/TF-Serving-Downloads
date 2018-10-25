@@ -115,52 +115,52 @@ def main(_):
   # time.sleep(1)
 
 
+  run_num_per_thread = 5
+  client_per_model = 2
+
+  t_pool = []
+  for i in range(client_per_model):
+    for j in range(len(model_names)):
+      model_name = model_names[j]
+      batch_size = batch_sizes[j]
+      t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name, i + client_per_model * j)))
+
+  start = time.time()
+
+  for t in t_pool:
+    t.start()
+
+  for t in t_pool:
+    t.join()
+
+  end = time.time()
+
+  print('\nFinished!')
+  print("[Sum] the total running time for these %d CNNs is %s" % (len(model_names) * client_per_model, str(end - start)))
+
+
+
+
   # run_num_per_thread = 1
   # client_per_model = 2
 
-  # t_pool = []
-  # for i in range(client_per_model):
-  #   for j in range(len(model_names)):
-  #     model_name = model_names[j]
-  #     batch_size = batch_sizes[j]
+  # for i in range(len(model_names)):
+  #   t_pool = []
+  #   model_name = model_names[i]
+  #   batch_size = batch_sizes[i]
+  #   for j in range(client_per_model):
   #     t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name, i + client_per_model * j)))
 
-  # start = time.time()
+  #   start = time.time()
 
-  # for t in t_pool:
-  #   t.start()
+  #   for t in t_pool:
+  #     t.start()
+  #   for t in t_pool:
+  #     t.join()
 
-  # for t in t_pool:
-  #   t.join()
+  #   end = time.time()
 
-  # end = time.time()
-
-  # print('\nFinished!')
-  # print("[Sum] the total running time for these %d CNNs is %s" % (len(model_names) * client_per_model, str(end - start)))
-
-
-
-
-  run_num_per_thread = 1
-  client_per_model = 2
-
-  for i in range(len(model_names)):
-    t_pool = []
-    model_name = model_names[i]
-    batch_size = batch_sizes[i]
-    for j in range(client_per_model):
-      t_pool.append(threading.Thread(target = run_model_in_parallel, args = (stub, run_num_per_thread, batch_size, model_name, i + client_per_model * j)))
-
-    start = time.time()
-
-    for t in t_pool:
-      t.start()
-    for t in t_pool:
-      t.join()
-
-    end = time.time()
-
-    print("The total running time to run two concurrent %s of batch size %d is %s" % (model_name, batch_size, str(end - start)))
+  #   print("The total running time to run two concurrent %s of batch size %d is %s" % (model_name, batch_size, str(end - start)))
 
 if __name__ == '__main__':
   tf.app.run()

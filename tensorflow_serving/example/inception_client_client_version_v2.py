@@ -41,6 +41,8 @@ from tensorflow_serving.apis import olympian_master_grpc_pb2
 
 import tensorflow as tf
 
+from tensorflow.python.framework import tensor_util
+
 def run():
   channel = grpc.insecure_channel('localhost:50051')
   stub = olympian_master_grpc_pb2.OlympianMasterStub(channel)
@@ -72,6 +74,40 @@ def run():
   # response = stub.CallTest(tomtest_pb2.OlympianRequest(input_path='/home/yitao/Documents/TF-Serving-Downloads/dog.jpg'))
   # print("Greeter client received: " + response.output_message)
 
+def runBatch():
+  channel = grpc.insecure_channel('localhost:50051')
+  stub = olympian_master_grpc_pb2.OlympianMasterStub(channel)
+
+  request = predict_pb2.PredictRequest()
+  request.model_spec.name = 'inception'
+  request.model_spec.signature_name = 'predict_images'
+
+  batchSize = 128
+  image = "/home/yitao/Documents/TF-Serving-Downloads/dog.jpg"
+
+  iteration_list = [2]
+  for iteration in iteration_list:
+    
+    for i in range(iteration):
+      image_data = []
+      start = time.time()
+      for j in range(batchSize):
+        with open(image, 'rb') as f:
+          image_data.append(f.read())
+
+      request.inputs['images'].CopyFrom(
+        tf.contrib.util.make_tensor_proto(image_data, shape=[len(image_data)]))
+
+      result = stub.Predict(request, 10.0)  # 10 secs timeout
+      
+      result_classes = tensor_util.MakeNdarray(result.outputs['classes'])
+      print("received result of shape: %s" % str(result_classes.shape))
+      # print(result_classes)
+      
+      end = time.time()
+      duration = end - start
+      print("it takes %s sec" % str(duration))
 
 if __name__ == '__main__':
-  run()
+  # run()
+  runBatch()

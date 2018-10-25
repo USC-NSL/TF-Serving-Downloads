@@ -168,7 +168,7 @@ bazel-bin/tensorflow_serving/example/inception_client --server localhost:9000 --
 # https://github.com/sugartom/Serving-TensorFlow-Model
 cd Documents/fun-project/Serving-TensorFlow-Model
 python export_model.py
-bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=weimin_model --model_base_path=/home/yitao/Documents/fun-project/Serving-TensorFlow-Model
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=weimin_model --model_base_path=/home/yitao/Documents/fun-project/tensorflow-related/Serving-TensorFlow-Model
 bazel-bin/tensorflow_serving/example/weimin_client --server localhost:9000
 
 

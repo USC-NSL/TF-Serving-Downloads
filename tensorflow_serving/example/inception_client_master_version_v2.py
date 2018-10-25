@@ -25,6 +25,8 @@ from __future__ import print_function
 from grpc.beta import implementations
 import tensorflow as tf
 
+from tensorflow.python.framework import tensor_util
+
 # from tensorflow_serving.apis import tomtest_pb2
 # from tensorflow_serving.apis import tomtest_grpc_pb2
 from tensorflow_serving.apis import predict_pb2
@@ -59,20 +61,42 @@ from concurrent import futures
 import grpc
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
-MAX_MESSAGE_LENGTH = 1024 * 1024 * 8
+MAX_MESSAGE_LENGTH = 1024 * 1024 * 64
+
+def GetTensorShapeList(ts_shape):
+  result = []
+  for s in ts_shape.dim:
+    result.append(int(s.size))
+
+  return result
+
+def GetNewShapeList(request_shape_list):
+  new_request_shape_list = request_shape_list
+  new_request_shape_list[0] = request_shape_list[0] / 2
+  return new_request_shape_list
 
 class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
   # def callServer(input_path):
   #   # host, port = FLAGS.server.split(':')
 
   def Predict(self, request, context):
-    print("Master receved request for model %s" % request.model_spec.name)
+    request_shape_list = GetTensorShapeList(request.inputs['images'].tensor_shape)
+    print("Master receved request for model %s with shape of %s" % (request.model_spec.name, request_shape_list))
+
     host = "localhost"
     port = "9000"
     channel = implementations.insecure_channel(host, int(port))
     stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
 
-    newrequest = request
+    # newrequest = request
+
+    new_request_shape_list = GetNewShapeList(request_shape_list)
+
+    newrequest = predict_pb2.PredictRequest()
+    newrequest.model_spec.name = request.model_spec.name
+    newrequest.model_spec.signature_name = request.model_spec.signature_name
+    newrequest.inputs['images'].CopyFrom(tf.contrib.util.make_tensor_proto(tensor_util.MakeNdarray(request.inputs['images'])[:new_request_shape_list[0]], shape=[new_request_shape_list[0]]))
+    # newrequest.inputs['images'] = request.inputs['images']
 
     result = stub.Predict(newrequest, 10.0)
     # print(result)
