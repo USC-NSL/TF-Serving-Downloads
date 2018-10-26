@@ -71,7 +71,10 @@ def GetTensorShapeList(ts_shape):
   return result
 
 def GetNewShapeList(request_shape_list):
-  new_request_shape_list = request_shape_list
+  # new_request_shape_list = request_shape_list
+  new_request_shape_list = []
+  for tmp in request_shape_list:
+    new_request_shape_list.append(tmp)
   new_request_shape_list[0] = request_shape_list[0] / 2
   return new_request_shape_list
 
@@ -95,8 +98,8 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
     newrequest = predict_pb2.PredictRequest()
     newrequest.model_spec.name = request.model_spec.name
     newrequest.model_spec.signature_name = request.model_spec.signature_name
-    newrequest.inputs['images'].CopyFrom(tf.contrib.util.make_tensor_proto(tensor_util.MakeNdarray(request.inputs['images'])[:new_request_shape_list[0]], shape=new_request_shape_list))
-    # newrequest.inputs['images'] = request.inputs['images']
+    # newrequest.inputs['images'].CopyFrom(tf.contrib.util.make_tensor_proto(tensor_util.MakeNdarray(request.inputs['images'])[:new_request_shape_list[0]], shape=new_request_shape_list))
+    newrequest.inputs['images'].CopyFrom(tf.contrib.util.make_tensor_proto(tensor_util.MakeNdarray(request.inputs['images']), shape=request_shape_list))
 
     result = stub.Predict(newrequest, 10.0)
     # print(result)

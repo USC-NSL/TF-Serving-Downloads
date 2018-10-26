@@ -82,10 +82,10 @@ def runBatch():
   request.model_spec.name = 'inception'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 100
+  batchSize = 600
   image = "/home/yitao/Documents/TF-Serving-Downloads/dog.jpg"
 
-  iteration_list = [2]
+  iteration_list = [1]
   for iteration in iteration_list:
     
     for i in range(iteration):
@@ -98,11 +98,14 @@ def runBatch():
       request.inputs['images'].CopyFrom(
         tf.contrib.util.make_tensor_proto(image_data, shape=[len(image_data)]))
 
-      result = stub.Predict(request, 10.0)  # 10 secs timeout
-      
-      result_classes = tensor_util.MakeNdarray(result.outputs['classes'])
-      print("received result of shape: %s" % str(result_classes.shape))
-      # print(result_classes)
+      try:
+        result = stub.Predict(request, 10.0)  # 10 secs timeout
+      except grpc.RpcError as e:
+        print("Failed with {0}: {1}".format(e.code(), e.details()))
+      else:
+        result_classes = tensor_util.MakeNdarray(result.outputs['classes'])
+        print("received result of shape: %s" % str(result_classes.shape))
+        # print(result_classes)
       
       end = time.time()
       duration = end - start
