@@ -249,6 +249,7 @@ class PredictionServiceImpl final : public PredictionService::Service {
         predictor_->Predict(run_options, core_.get(), *request, response));
     if (!status.ok()) {
       VLOG(1) << "Predict failed: " << status.error_message();
+      LOG(INFO) << "[Yitao] Predict failed: " << status.error_message();
     }
 
     LOG(INFO) << "[Yitao] finish Predict(), fractional_seconds_since_epoch = " << std::fixed << std::setprecision(2) << std::chrono::duration_cast<std::chrono::duration<double>>( std::chrono::system_clock::now().time_since_epoch()).count();

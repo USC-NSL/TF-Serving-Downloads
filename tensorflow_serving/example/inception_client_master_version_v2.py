@@ -35,6 +35,9 @@ from tensorflow_serving.apis import olympian_master_grpc_pb2
 
 import time
 
+import logging
+logging.basicConfig()
+
 # tf.app.flags.DEFINE_string('server', 'localhost:9000',
 #                            'PredictionService host:port')
 # tf.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
@@ -101,34 +104,31 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
     # newrequest.inputs['images'].CopyFrom(tf.contrib.util.make_tensor_proto(tensor_util.MakeNdarray(request.inputs['images'])[:new_request_shape_list[0]], shape=new_request_shape_list))
     newrequest.inputs['images'].CopyFrom(tf.contrib.util.make_tensor_proto(tensor_util.MakeNdarray(request.inputs['images']), shape=request_shape_list))
 
-    result = stub.Predict(newrequest, 10.0)
+    try:
+      result = stub.Predict(newrequest, 15.0)
+
+    except Exception as e:
+      # print("Failed with {0}: {1}".format(e.code(), e.details()))
+      # Note that: very likely be grpc.framework.interfaces.face.face.AbortionError
+      print("Failed with: %s" % str(e)) 
+      print("Let's start with half batch size of %s!" % str(new_request_shape_list))
+
+      tmprequest = predict_pb2.PredictRequest()
+      tmprequest.model_spec.name = request.model_spec.name
+      tmprequest.model_spec.signature_name = request.model_spec.signature_name
+      tmprequest.inputs['images'].CopyFrom(tf.contrib.util.make_tensor_proto(tensor_util.MakeNdarray(request.inputs['images'])[:new_request_shape_list[0]], shape=new_request_shape_list))
+      tmpresult = stub.Predict(tmprequest, 10.0)
+      tmpresult = stub.Predict(tmprequest, 10.0)
+      return tmpresult
+
+      # raise ValueError("Biubiubiu")
+    else:
+      print("Server succeeded!")
     # print(result)
-
-    return result
-
-
-    # newrequest = predict_pb2.PredictRequest()
-    # newrequest.model_spec.name = 'inception'
-    # newrequest.model_spec.signature_name = 'predict_images'
+      return result
     
-    # iteration_list = [1, 10, 100]
-    # for iteration in iteration_list:
-    #   start = time.time()
-    #   for i in range(iteration):
-    #     # Send request
-    #     with open(request.input_path, 'rb') as f:
-    #       # See prediction_service.proto for gRPC request/response details.
-    #       data = f.read()
-    #       newrequest.inputs['images'].CopyFrom(
-    #           tf.contrib.util.make_tensor_proto(data, shape=[1]))
-    #       result = stub.Predict(newrequest, 10.0)  # 10 secs timeout
-    #       # print(result)
-
-    #   end = time.time()
-
-    #   print("It takes %s sec to run %d images for Inception" % (str(end - start), iteration))
-
-    # return tomtest_pb2.OlympianReply(output_message="Good Job!")
+    # result = stub.Predict(newrequest, 20.0)
+    # return result
 
 
 

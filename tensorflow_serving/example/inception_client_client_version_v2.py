@@ -99,9 +99,11 @@ def runBatch():
         tf.contrib.util.make_tensor_proto(image_data, shape=[len(image_data)]))
 
       try:
-        result = stub.Predict(request, 10.0)  # 10 secs timeout
+        result = stub.Predict(request, 30.0)  # 10 secs timeout
       except grpc.RpcError as e:
         print("Failed with {0}: {1}".format(e.code(), e.details()))
+      except Exception as e:
+        print("Unknown error: %s" % str(e))
       else:
         result_classes = tensor_util.MakeNdarray(result.outputs['classes'])
         print("received result of shape: %s" % str(result_classes.shape))
