@@ -103,7 +103,7 @@ def myFuncWarmUp(stub, i):
   request.model_spec.name = 'inception'
   request.model_spec.signature_name = 'predict_images'
 
-  batchSize = 100
+  batchSize = 600
   durationSum = 0.0
   runNum = 13
 
@@ -176,7 +176,7 @@ def main(_):
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
 
   # run Inception job
-  # myFuncWarmUp(stub, 0)
+  myFuncWarmUp(stub, 0)
 
   # time.sleep(1)
   # print("...5")
@@ -190,25 +190,25 @@ def main(_):
   # print("...1")
   # time.sleep(1)
 
-  num_tests = 2
-  tPool = []
-  for i in range(num_tests):
-    tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i)))
+  # num_tests = 2
+  # tPool = []
+  # for i in range(num_tests):
+  #   tPool.append(threading.Thread(target = myFuncParallel, args = (stub, i)))
 
-  start = time.time()
-  for i in range(num_tests):
-    t = tPool[i]
-    t.start()
-    # time.sleep(2.0)
+  # start = time.time()
+  # for i in range(num_tests):
+  #   t = tPool[i]
+  #   t.start()
+  #   # time.sleep(2.0)
 
-  for i in range(num_tests):
-    t = tPool[i]
-    t.join()
+  # for i in range(num_tests):
+  #   t = tPool[i]
+  #   t.join()
 
-  end = time.time()
+  # end = time.time()
 
-  print('\nFinished!')
-  print('[Parallel] The total running time to run %d concurrent jobs is %s' % (num_tests, str(end - start)))
+  # print('\nFinished!')
+  # print('[Parallel] The total running time to run %d concurrent jobs is %s' % (num_tests, str(end - start)))
 
 
 if __name__ == '__main__':

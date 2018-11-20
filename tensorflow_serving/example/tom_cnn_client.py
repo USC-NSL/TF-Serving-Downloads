@@ -47,8 +47,8 @@ def main(_):
   channel = implementations.insecure_channel(host, int(port))
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
   
-  x = mnist.test.images[9:10]
-  y = mnist.test.labels[9:10]
+  x = mnist.test.images[0:1000]
+  y = mnist.test.labels[0:1000]
   keep_prob = 1.0
 
   # print(x.shape)
@@ -62,9 +62,11 @@ def main(_):
   request.inputs['keep_prob'].CopyFrom(
         tf.contrib.util.make_tensor_proto(keep_prob))
 
-  result = stub.Predict(request, 10.0)
-  print(result.outputs["output"].float_val)
-  print("y = %s" % str(y))
+  for i in range(13):
+    result = stub.Predict(request, 10.0)
+  
+    # print(result.outputs["output"].float_val)
+    # print("y = %s" % str(y))
 
 if __name__ == '__main__':
   tf.app.run()

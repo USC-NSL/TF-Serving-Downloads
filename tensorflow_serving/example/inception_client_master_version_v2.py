@@ -119,11 +119,14 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
       tmprequest.inputs['images'].CopyFrom(tf.contrib.util.make_tensor_proto(tensor_util.MakeNdarray(request.inputs['images'])[:new_request_shape_list[0]], shape=new_request_shape_list))
       tmpresult = stub.Predict(tmprequest, 10.0)
       tmpresult = stub.Predict(tmprequest, 10.0)
+
+      print("Done with two sub-requests!\n")
+
       return tmpresult
 
       # raise ValueError("Biubiubiu")
     else:
-      print("Server succeeded!")
+      print("Server succeeded!\n")
     # print(result)
       return result
     

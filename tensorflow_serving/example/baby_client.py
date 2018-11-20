@@ -66,7 +66,7 @@ def runBatchWarmUp(stub, batchSize, runNum):
         tf.contrib.util.make_tensor_proto(image_data, shape=[len(image_data)]))
 
     try:
-      result = stub.Predict(request, 10.0)  # 10 secs timeout  
+      result = stub.Predict(request, 30.0)  # 10 secs timeout  
     except Exception as e:
       print("[Warmup] Failed with %s" % str(e))
     # else:
@@ -116,7 +116,7 @@ if __name__ == '__main__':
   channel = grpc.insecure_channel('localhost:50051')
   stub = olympian_master_grpc_pb2.OlympianMasterStub(channel)
 
-  batchSize = 400
+  batchSize = 100
   warmupRunNum = 13
   parallelClientNum = 1
   parallelRunNum = 10
