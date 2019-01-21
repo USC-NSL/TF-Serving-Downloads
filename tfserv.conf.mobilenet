@@ -1,0 +1,12 @@
+model_config_list: {
+  config: {
+    name: "exported_mobilenet_v1_1.0_224_preprocess",
+    base_path: "/home/yitao/Documents/fun-project/tensorflow-related/tensorflow-for-poets-2/exported_mobilenet_v1_1.0_224_preprocess",
+    model_platform: "tensorflow"
+  },
+  config: {
+    name: "exported_mobilenet_v1_1.0_224_inference",
+    base_path: "/home/yitao/Documents/fun-project/tensorflow-related/tensorflow-for-poets-2/exported_mobilenet_v1_1.0_224_inference",
+    model_platform: "tensorflow"
+  }
+}

@@ -52,6 +52,9 @@ bazel-bin/tensorflow_serving/example/nvidia_autopilot_client
   - Darkflow
     bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=darkflow_yolo --model_base_path=/home/yitao/Documents/fun-project/darknet-repo/test/darkflow_yolo
 
+  - Mobilenet
+    bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_config_file=tfserv.conf.mobilenet >out-001 2>&1
+
 * Client:
   - Inception and ResNet
     bazel-bin/tensorflow_serving/example/olympia_client --server localhost:9000
@@ -82,6 +85,9 @@ bazel-bin/tensorflow_serving/example/nvidia_autopilot_client
 
   - Darkflow
     bazel-bin/tensorflow_serving/example/darkflow_yolo_client --server localhost:9000
+
+  - Mobilenet
+    bazel-bin/tensorflow_serving/example/mobilenet_client
 
 ==================================================================================================================================
 
@@ -246,3 +252,10 @@ mv olympian_master_pb2_grpc.py olympian_master_grpc_pb2.py
 # For pose_tensorflow
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=pose_tensorflow --model_base_path=/home/yitao/Documents/fun-project/tensorflow-related/pose-tensorflow/pose_tensorflow
 bazel-bin/tensorflow_serving/example/pose_tensorflow_client --server localhost:9000
+
+# For Mobilenet
+git clone https://github.com/sugartom/tensorflow-for-poets-2.git
+cd tensorflow-for-poets-2
+python scripts/label_image_tom.py --graph=tf_files/retrained_graph.pb --image=tf_files/flower_photos/daisy/21652746_cc379e0eea_m.jpg
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_config_file=tfserv.conf.mobilenet >out-001 2>&1
+bazel-bin/tensorflow_serving/example/mobilenet_client
