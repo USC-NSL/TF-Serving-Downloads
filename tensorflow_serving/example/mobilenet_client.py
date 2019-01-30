@@ -76,7 +76,7 @@ def main(_):
 
   batch_size = 128
   
-  iteration_list = [1, 10, 20, 40, 80, 160]
+  iteration_list = [1, 10, 20]
   for iteration in iteration_list:
     start = time.time()
     for i in range(iteration):

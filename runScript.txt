@@ -1,6 +1,11 @@
 activity detection
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_config_file=tfserv.conf.activity.detection >out-001 2>&1
+bazel-bin/tensorflow_serving/example/activity_detection_master
 python main.py --video_src /home/yitao/Documents/fun-project/actions_demo/videos/indoor_two_ppl.avi
+
+mobilenet
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_config_file=tfserv.conf.mobilenet >out-001 2>&1
+bazel-bin/tensorflow_serving/example/mobilenet_client
 
 new
 - darkflow
