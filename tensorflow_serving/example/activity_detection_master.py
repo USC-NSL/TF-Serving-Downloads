@@ -96,7 +96,13 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
     stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
 
     newrequest = request
+
+    start = time.time()
     result = stub.Predict(newrequest, 15.0)
+    end = time.time()
+
+    print("    It takes %s sec to run model %s with shape of %s" % (str(end - start), request.model_spec.name, request_shape_list))
+
     return result
 
     # new_request_shape_list = GetNewShapeList(request_shape_list)
