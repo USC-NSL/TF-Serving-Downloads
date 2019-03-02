@@ -472,8 +472,10 @@ py_binary(
     ],
     deps = [
         "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:olympian_master_proto_py_pb2",
         "//tensorflow_serving/apis:olympian_worker_proto_py_pb2",
         "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "//tensorflow_serving/apis:olympian_master_grpc_proto_py_pb2",
         "//tensorflow_serving/apis:olympian_worker_grpc_proto_py_pb2",
         "@org_tensorflow//tensorflow:tensorflow_py",
     ],

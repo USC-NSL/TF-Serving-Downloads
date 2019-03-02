@@ -45,6 +45,7 @@ import grpc
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 MAX_MESSAGE_LENGTH = 1024 * 1024 * 64
 
+# Master Class
 class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
 
   def __init__(self):
@@ -69,28 +70,32 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
     else:
       return "Not implemented yet..."
 
+  def getNextStub(self, route_table):
+    tmp = route_table.split("-")[0].split(":")
+    next_stub = "%s:%s" % (tmp[1], tmp[2])
+    return next_stub
+
   def printRouteTable(self, route_table, machine_name):
     tmp = route_table.split("-")
     for i in range(len(tmp)):
-      print("[%s] route info: hop-%s %s" % (machine_name, str(i).zfill(2), tmp[i]))
+      print("[%s][%s] route info: hop-%s %s" % (str(time.time()), machine_name, str(i).zfill(2), tmp[i]))
 
   def Predict(self, request, context):
     if (request.model_spec.signature_name == "chain_specification"): # gRPC from client
       chain_name = request.model_spec.name
       client_input = tensor_util.MakeNdarray(request.inputs["client_input"])
-      print("[Master] Received request using chain %s with client_input = %s" % (chain_name, str(client_input)))
+      print("[%s][Master] Received request using chain %s with client_input = %s" % (str(time.time()), chain_name, str(client_input)))
 
       route_table = self.getRouteTable(chain_name)
-      # print("[Master] %s" % route_table)
       self.printRouteTable(str(route_table), "Worker")
-      tmp = route_table.split("-")[0].split(":")
-      next_stub = "%s:%s" % (tmp[1], tmp[2])
-      print("[Master] next stub is %s\n" % next_stub)
+
+      next_stub = self.getNextStub(route_table)      
+      print("[%s][Master] next stub is %s\n" % (str(time.time()), next_stub))
 
       newrequest = predict_pb2.PredictRequest()
       newrequest.model_spec.name = chain_name
       newrequest.model_spec.signature_name = "chain_specification"
-      newrequest.inputs["client_input"].CopyFrom(
+      newrequest.inputs["input"].CopyFrom(
         tf.contrib.util.make_tensor_proto(client_input))
       newrequest.inputs["route_table"].CopyFrom(
         tf.contrib.util.make_tensor_proto(route_table))

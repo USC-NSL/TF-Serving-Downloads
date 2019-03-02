@@ -23,6 +23,7 @@ from __future__ import print_function
 # This is a placeholder for a Google-internal import.
 
 import grpc
+import time
 
 from grpc.beta import implementations
 import tensorflow as tf
@@ -52,9 +53,10 @@ def main(_):
   request.inputs["client_input"].CopyFrom(
     tf.contrib.util.make_tensor_proto(file_name))
 
+  print("[%s][Client] Ready to send client_input!" % (str(time.time())))
   result = stub.Predict(request, 10.0)
   message = tensor_util.MakeNdarray(result.outputs["message"])
-  print(message)
+  print("[%s][Client] Received message %s" % (str(time.time()), message))
 
 
 if __name__ == '__main__':
