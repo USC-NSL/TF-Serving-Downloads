@@ -140,6 +140,16 @@ serving_proto_library_py(
     ],
 )
 
+serving_proto_library_py(
+    name = "olympian_worker_proto_py_pb2",
+    srcs = ["olympian_worker.proto"],
+    proto_library = "olympian_worker_proto",
+    deps = [
+        ":model_proto_py_pb2",
+        "@org_tensorflow//tensorflow/core:protos_all_py",
+    ],
+)
+
 serving_proto_library(
     name = "prediction_service_proto",
     srcs = ["prediction_service.proto"],
@@ -184,6 +194,18 @@ py_library(
 py_library(
     name = "olympian_master_grpc_proto_py_pb2",
     srcs = ["olympian_master_grpc_pb2.py"],
+    deps = [
+        ":classification_proto_py_pb2",
+        ":get_model_metadata_proto_py_pb2",
+        ":inference_proto_py_pb2",
+        ":predict_proto_py_pb2",
+        ":regression_proto_py_pb2",
+    ],
+)
+
+py_library(
+    name = "olympian_worker_grpc_proto_py_pb2",
+    srcs = ["olympian_worker_grpc_pb2.py"],
     deps = [
         ":classification_proto_py_pb2",
         ":get_model_metadata_proto_py_pb2",

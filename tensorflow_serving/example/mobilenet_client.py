@@ -48,6 +48,8 @@ def load_labels(label_file):
 
 
 def main(_):
+  labels = load_labels("/home/yitao/Documents/fun-project/tensorflow-related/tensorflow-for-poets-2/tf_files/retrained_labels.txt")
+
   host, port = FLAGS.server.split(':')
   channel = implementations.insecure_channel(host, int(port))
   stub = prediction_service_pb2.beta_create_PredictionService_stub(channel)
@@ -74,9 +76,9 @@ def main(_):
   request_inference.model_spec.name = 'exported_mobilenet_v1_1.0_224_inference'
   request_inference.model_spec.signature_name = 'predict_images'
 
-  batch_size = 128
+  batch_size = 1
   
-  iteration_list = [1, 10, 20]
+  iteration_list = [1]
   for iteration in iteration_list:
     start = time.time()
     for i in range(iteration):
@@ -88,22 +90,16 @@ def main(_):
 
       result_inference = stub.Predict(request_inference, 10.0)
 
-      # result_inference_value = tensor_util.MakeNdarray(result_inference.outputs['scores'])
+      result_inference_value = tensor_util.MakeNdarray(result_inference.outputs['scores'])
       # print(result_inference_value.shape)
+      
+      results = np.squeeze(result_inference_value)
+      top_k = results.argsort()[-5:][::-1]
+      for i in top_k:
+        print(labels[i], results[i])
 
     end = time.time()
     print("It takes %s sec to run %d mobilenet jobs with batch size of %d" % (str(end - start), iteration, batch_size))
-
-
-
-
-  # results = np.squeeze(result_inference_value)
-
-  # top_k = results.argsort()[-5:][::-1]
-  # labels = load_labels("/home/yitao/Documents/fun-project/tensorflow-related/tensorflow-for-poets-2/tf_files/retrained_labels.txt")
-
-  # for i in top_k:
-  #   print(labels[i], results[i])
 
 if __name__ == '__main__':
   tf.app.run()

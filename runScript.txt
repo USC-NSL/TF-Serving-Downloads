@@ -7,6 +7,10 @@ mobilenet
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_config_file=tfserv.conf.mobilenet >out-001 2>&1
 bazel-bin/tensorflow_serving/example/mobilenet_client
 
+SSD
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=exported_ssd --model_base_path=/home/yitao/Documents/fun-project/tensorflow-related/SSD-Tensorflow/exported_ssd
+bazel-bin/tensorflow_serving/example/ssd_client
+
 new
 - darkflow
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=darkflow_yolo --model_base_path=/home/yitao/Documents/fun-project/darknet-repo/test/darkflow_yolo >out-001 2>&1
@@ -254,6 +258,11 @@ bazel-bin/tensorflow_serving/example/tf_openpose_client --server localhost:9000
 python -m grpc.tools.protoc --python_out=. --grpc_python_out=. -I.:./tensorflow tensorflow_serving/apis/olympian_master.proto
 mv olympian_master_pb2_grpc.py olympian_master_grpc_pb2.py
 
+# For olympian_worker.proto
+python -m grpc.tools.protoc --python_out=. --grpc_python_out=. -I.:./tensorflow tensorflow_serving/apis/olympian_worker.proto
+mv olympian_worker_pb2_grpc.py olympian_worker_grpc_pb2.py
+!!! remember to modify tensorflow_serving/apis/BUILD accordingly!!!
+
 # For pose_tensorflow
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=pose_tensorflow --model_base_path=/home/yitao/Documents/fun-project/tensorflow-related/pose-tensorflow/pose_tensorflow
 bazel-bin/tensorflow_serving/example/pose_tensorflow_client --server localhost:9000
@@ -264,3 +273,10 @@ cd tensorflow-for-poets-2
 python scripts/label_image_tom.py --graph=tf_files/retrained_graph.pb --image=tf_files/flower_photos/daisy/21652746_cc379e0eea_m.jpg
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_config_file=tfserv.conf.mobilenet >out-001 2>&1
 bazel-bin/tensorflow_serving/example/mobilenet_client
+
+# For SSD
+git clone https://github.com/sugartom/SSD-Tensorflow
+cd SSD-Tensorflow
+python tomTest.py
+bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_name=exported_ssd --model_base_path=/home/yitao/Documents/fun-project/tensorflow-related/SSD-Tensorflow/exported_ssd
+bazel-bin/tensorflow_serving/example/ssd_client

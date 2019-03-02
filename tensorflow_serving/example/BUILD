@@ -448,3 +448,47 @@ py_binary(
         "@org_tensorflow//tensorflow:tensorflow_py",
     ],
 )
+
+py_binary(
+    name = "prototype_v1_master",
+    srcs = [
+        "prototype_v1_master.py",
+    ],
+    deps = [
+        "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:olympian_master_proto_py_pb2",
+        "//tensorflow_serving/apis:olympian_worker_proto_py_pb2",
+        "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "//tensorflow_serving/apis:olympian_master_grpc_proto_py_pb2",
+        "//tensorflow_serving/apis:olympian_worker_grpc_proto_py_pb2",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+    ],
+)
+
+py_binary(
+    name = "prototype_v1_worker",
+    srcs = [
+        "prototype_v1_worker.py",
+    ],
+    deps = [
+        "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:olympian_worker_proto_py_pb2",
+        "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "//tensorflow_serving/apis:olympian_worker_grpc_proto_py_pb2",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+    ],
+)
+
+py_binary(
+    name = "prototype_v1_client",
+    srcs = [
+        "prototype_v1_client.py",
+    ],
+    deps = [
+        "//tensorflow_serving/apis:predict_proto_py_pb2",
+        "//tensorflow_serving/apis:olympian_master_proto_py_pb2",
+        "//tensorflow_serving/apis:prediction_service_proto_py_pb2",
+        "//tensorflow_serving/apis:olympian_master_grpc_proto_py_pb2",
+        "@org_tensorflow//tensorflow:tensorflow_py",
+    ],
+)
