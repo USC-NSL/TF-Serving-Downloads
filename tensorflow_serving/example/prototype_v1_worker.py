@@ -65,7 +65,7 @@ class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
     # add master stub
     master_list = ["localhost:50051"]
     for m in master_list:
-      channel = grpc.insecure_channel(w)
+      channel = grpc.insecure_channel(m)
       stub = olympian_master_grpc_pb2.OlympianMasterStub(channel)
       self.cstubs[m] = stub
 
@@ -92,13 +92,13 @@ class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
     for i in range(len(tmp)):
       print("[%s][%s] route info: hop-%s %s" % (str(time.time()), machine_name, str(i).zfill(2), tmp[i]))
 
-  def load_labels(self):
-    label_file = ("/home/yitao/Documents/fun-project/tensorflow-related/tensorflow-for-poets-2/tf_files/retrained_labels.txt")
-    label = []
-    proto_as_ascii_lines = tf.gfile.GFile(label_file).readlines()
-    for l in proto_as_ascii_lines:
-      label.append(l.rstrip())
-    return label
+  # def load_labels(self):
+  #   label_file = ("/home/yitao/Documents/fun-project/tensorflow-related/tensorflow-for-poets-2/tf_files/retrained_labels.txt")
+  #   label = []
+  #   proto_as_ascii_lines = tf.gfile.GFile(label_file).readlines()
+  #   for l in proto_as_ascii_lines:
+  #     label.append(l.rstrip())
+  #   return label
 
   def Predict(self, request, context):
     if (request.model_spec.signature_name == "chain_specification"): # gRPC from client
@@ -109,16 +109,14 @@ class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
       else:
         request_input = tensor_util.MakeNdarray(request.inputs["normalized_image"])
 
-      print("[%s][Worker] Received request using chain %s with request_input = %s" % (str(time.time()), chain_name, str(request_input)))
+      print("[%s][Worker] Received request using chain %s with request_input.shape = %s" % (str(time.time()), chain_name, str(request_input.shape)))
 
       route_table = tensor_util.MakeNdarray(request.inputs["route_table"])
-      # print("[Worker] %s" % route_table)
-      self.printRouteTable(str(route_table), "Worker")
-
-      print(" ")
+      # self.printRouteTable(str(route_table), "Worker")
 
       current_model, next_stub = self.getStubInfo(str(route_table), FLAGS.worker)
-      print("[%s][Worker] current_model = %s, next_stub = %s" % (time.time(), current_model, next_stub))
+      print("[%s][Worker] current_model = %s" % (time.time(), current_model))
+      print("                        next_stub = %s\n" % (next_stub))
 
 
 
@@ -134,7 +132,7 @@ class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
 
         internal_result_value = tensor_util.MakeNdarray(internal_result.outputs["normalized_image"])
         print(internal_result_value.shape)
-        print(internal_result_value[0, 90:95, 205, :])
+        # print(internal_result_value[0, 90:95, 205, :])
 
         next_request = predict_pb2.PredictRequest()
         next_request.model_spec.name = chain_name
@@ -158,14 +156,23 @@ class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
         internal_result = self.istub.Predict(internal_request, 10.0)
 
         internal_result_value = tensor_util.MakeNdarray(internal_result.outputs["scores"])
+        print(internal_result_value.shape)
 
-        labels = self.load_labels()
-        results = np.squeeze(internal_result_value)
-        top_k = results.argsort()[-5:][::-1]
-        for i in top_k:
-          print(labels[i], results[i])
+        next_request = predict_pb2.PredictRequest()
+        next_request.model_spec.name = chain_name
+        next_request.model_spec.signature_name = "chain_specification"
 
-        #!!! Should use gRPC to send result back to Master here.
+        next_request.inputs['FINAL'].CopyFrom(
+          tf.contrib.util.make_tensor_proto(internal_result_value, shape=[1, 5]))
+
+        next_result = self.cstubs[next_stub].Predict(next_request, 10.0)
+
+        # labels = self.load_labels()
+        # results = np.squeeze(internal_result_value)
+        # top_k = results.argsort()[-5:][::-1]
+        # for i in top_k:
+        #   print(labels[i], results[i])
+
 
 
 

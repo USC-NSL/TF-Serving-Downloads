@@ -35,6 +35,7 @@ from tensorflow_serving.apis import olympian_master_grpc_pb2
 from tensorflow_serving.apis import olympian_worker_grpc_pb2
 
 import time
+import numpy as np
 
 import logging
 logging.basicConfig()
@@ -60,7 +61,7 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
     # add master stub
     master_list = ["localhost:50051"]
     for m in master_list:
-      channel = grpc.insecure_channel(w)
+      channel = grpc.insecure_channel(m)
       stub = olympian_master_grpc_pb2.OlympianMasterStub(channel)
       self.cstubs[m] = stub
 
@@ -80,17 +81,26 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
     for i in range(len(tmp)):
       print("[%s][%s] route info: hop-%s %s" % (str(time.time()), machine_name, str(i).zfill(2), tmp[i]))
 
+  def load_labels(self):
+    label_file = ("/home/yitao/Documents/fun-project/tensorflow-related/tensorflow-for-poets-2/tf_files/retrained_labels.txt")
+    label = []
+    proto_as_ascii_lines = tf.gfile.GFile(label_file).readlines()
+    for l in proto_as_ascii_lines:
+      label.append(l.rstrip())
+    return label
+
   def Predict(self, request, context):
-    if (request.model_spec.signature_name == "chain_specification"): # gRPC from client
+    # if (request.model_spec.signature_name == "chain_specification"): # gRPC from client
+    if ("FINAL" not in request.inputs): # gRPC from client
       chain_name = request.model_spec.name
       client_input = tensor_util.MakeNdarray(request.inputs["client_input"])
       print("[%s][Master] Received request using chain %s with client_input = %s" % (str(time.time()), chain_name, str(client_input)))
 
       route_table = self.getRouteTable(chain_name)
-      self.printRouteTable(str(route_table), "Worker")
+      # self.printRouteTable(str(route_table), "Worker")
 
       next_stub = self.getNextStub(route_table)      
-      print("[%s][Master] next stub is %s\n" % (str(time.time()), next_stub))
+      print("[%s][Master] next stub is %s\n\n" % (str(time.time()), next_stub))
 
       newrequest = predict_pb2.PredictRequest()
       newrequest.model_spec.name = chain_name
@@ -107,7 +117,20 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
       return dumbresult
 
     else: # gRPC from worker
-      print("[Master] Not implemented yet...")
+      # print("[Master] Not implemented yet...")
+      final_result_value = tensor_util.MakeNdarray(request.inputs["FINAL"])
+      print(final_result_value.shape)
+
+      # Mobilenet specific
+      if (request.model_spec.name == "chain_mobilenet"):
+        labels = self.load_labels()
+        results = np.squeeze(final_result_value)
+        top_k = results.argsort()[-5:][::-1]
+        for i in top_k:
+          print(labels[i], results[i])
+
+
+
       dumbresult = predict_pb2.PredictResponse()
       dumbresult.outputs["message"].CopyFrom(tf.contrib.util.make_tensor_proto("OK"))
       return dumbresult
