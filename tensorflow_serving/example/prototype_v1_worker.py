@@ -42,6 +42,7 @@ logging.basicConfig()
 
 from concurrent import futures
 import grpc
+import threading
 
 _ONE_DAY_IN_SECONDS = 60 * 60 * 24
 MAX_MESSAGE_LENGTH = 1024 * 1024 * 64
@@ -53,20 +54,39 @@ FLAGS = tf.app.flags.FLAGS
 # Worker Class
 class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
 
+  def sendHeartBeat(self):
+    # send heartbeat message to Master every 15 sec.
+    while (True):
+      hb_message = "Hello from %s" % str(FLAGS.worker)
+
+      hb_request = predict_pb2.PredictRequest()
+      hb_request.model_spec.name = "unknown"
+      hb_request.model_spec.signature_name = 'unknown'
+
+      hb_request.inputs['HEARTBEAT'].CopyFrom(
+        tf.contrib.util.make_tensor_proto(hb_message))
+      try:
+        hb_result = self.cstubs[self.master_list[0]].Predict(hb_request, 10.0)
+      except Exception as e:
+        print("Failed with: %s" % str(e)) 
+        break
+
+      time.sleep(15)
+
   def __init__(self):
     self.cstubs = dict()
 
     # add worker stub
-    worker_list = ["localhost:50101", "localhost:50102"]
+    self.worker_list = ["localhost:50101", "localhost:50102"]
     # worker_list = ["192.168.1.125:50101", "192.168.1.102:50102"]
-    for w in worker_list:
+    for w in self.worker_list:
       channel = grpc.insecure_channel(w)
       stub = olympian_worker_grpc_pb2.OlympianWorkerStub(channel)
       self.cstubs[w] = stub
     # add master stub
-    master_list = ["localhost:50051"]
+    self.master_list = ["localhost:50051"]
     # master_list = ["192.168.1.102:50051"]
-    for m in master_list:
+    for m in self.master_list:
       channel = grpc.insecure_channel(m)
       stub = olympian_master_grpc_pb2.OlympianMasterStub(channel)
       self.cstubs[m] = stub
@@ -74,6 +94,10 @@ class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
     # add istub for internal TF-Serving
     ichannel = implementations.insecure_channel("localhost", 9000)
     self.istub = prediction_service_pb2.beta_create_PredictionService_stub(ichannel)
+
+    # send heartbeat periodically
+    t = threading.Thread(target =  self.sendHeartBeat)
+    t.start()
 
   def getStubInfo(self, route_table, current_stub):
     tmp = route_table.split("-")

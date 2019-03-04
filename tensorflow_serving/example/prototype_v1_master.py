@@ -133,7 +133,7 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
 
     elif ("HEARTBEAT" in request.inputs): # gRPC of heartbeats from worker
       hb_message = tensor_util.MakeNdarray(request.inputs["HEARTBEAT"])
-      print("[%s][Master] Received heartbeat message = %s, w/ peer = %s" % (str(time.time()), str(hb_message), context.peer()))
+      print("[%s][Master] Received heartbeat message = %s, w/ peer = %s\n" % (str(time.time()), str(hb_message), context.peer()))
 
     else:
       print("[%s][Master] Something is wrong..." % (str(time.time())))
