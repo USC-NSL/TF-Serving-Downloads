@@ -53,13 +53,15 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
     self.cstubs = dict()
 
     # add worker stub
-    worker_list = ["localhost:50101", "localhost:50102"]
+    # worker_list = ["localhost:50101", "localhost:50102"]
+    worker_list = ["192.168.1.125:50101", "192.168.1.102:50102"]
     for w in worker_list:
       channel = grpc.insecure_channel(w)
       stub = olympian_worker_grpc_pb2.OlympianWorkerStub(channel)
       self.cstubs[w] = stub
     # add master stub
-    master_list = ["localhost:50051"]
+    # master_list = ["localhost:50051"]
+    master_list = ["192.168.1.102:50051"]
     for m in master_list:
       channel = grpc.insecure_channel(m)
       stub = olympian_master_grpc_pb2.OlympianMasterStub(channel)
@@ -67,7 +69,8 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
 
   def getRouteTable(self, chain_name):
     if (chain_name == "chain_mobilenet"):
-      return "exported_mobilenet_v1_1.0_224_preprocess:localhost:50101-exported_mobilenet_v1_1.0_224_inference:localhost:50102-FINAL:localhost:50051"
+      # return "exported_mobilenet_v1_1.0_224_preprocess:localhost:50101-exported_mobilenet_v1_1.0_224_inference:localhost:50102-FINAL:localhost:50051"
+      return "exported_mobilenet_v1_1.0_224_preprocess:192.168.1.125:50101-exported_mobilenet_v1_1.0_224_inference:192.168.1.102:50102-FINAL:192.168.1.102:50051"
     else:
       return "Not implemented yet..."
 

@@ -44,7 +44,8 @@ def main(_):
 
   file_name = "/home/yitao/Documents/fun-project/tensorflow-related/tensorflow-for-poets-2/tf_files/flower_photos/daisy/21652746_cc379e0eea_m.jpg"
 
-  channel = grpc.insecure_channel("localhost:50051")
+  # channel = grpc.insecure_channel("localhost:50051")
+  channel = grpc.insecure_channel("192.168.1.102:50051")
   stub = olympian_master_grpc_pb2.OlympianMasterStub(channel)
 
   request = predict_pb2.PredictRequest()
