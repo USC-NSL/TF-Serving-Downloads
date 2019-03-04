@@ -93,17 +93,17 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
     return label
 
   def Predict(self, request, context):
-    # if (request.model_spec.signature_name == "chain_specification"): # gRPC from client
-    if ("FINAL" not in request.inputs): # gRPC from client
+    print("========== Predict() ==========")
+    if ("client_input" in request.inputs): # gRPC of raw input from client
       chain_name = request.model_spec.name
       client_input = tensor_util.MakeNdarray(request.inputs["client_input"])
-      print("[%s][Master] Received request using chain %s with client_input = %s" % (str(time.time()), chain_name, str(client_input)))
+      print("[%s][Master] Received request using chain %s w/ peer = %s, client_input = %s" % (str(time.time()), chain_name, str(context.peer()), str(client_input)))
 
       route_table = self.getRouteTable(chain_name)
       # self.printRouteTable(str(route_table), "Worker")
 
       next_stub = self.getNextStub(route_table)      
-      print("[%s][Master] next stub is %s\n\n" % (str(time.time()), next_stub))
+      print("[%s][Master] next stub is %s\n" % (str(time.time()), next_stub))
 
       newrequest = predict_pb2.PredictRequest()
       newrequest.model_spec.name = chain_name
@@ -115,14 +115,11 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
 
       result = self.cstubs[next_stub].Predict(newrequest, 10.0)
 
-      dumbresult = predict_pb2.PredictResponse()
-      dumbresult.outputs["message"].CopyFrom(tf.contrib.util.make_tensor_proto("OK"))
-      return dumbresult
-
-    else: # gRPC from worker
+    elif ("FINAL" in request.inputs): # gRPC of final result from worker
       # print("[Master] Not implemented yet...")
+      print("[%s][Master] Received final result w/ peer = %s" % (str(time.time()), context.peer()))
       final_result_value = tensor_util.MakeNdarray(request.inputs["FINAL"])
-      print(final_result_value.shape)
+      # print(final_result_value.shape)
 
       # Mobilenet specific
       if (request.model_spec.name == "chain_mobilenet"):
@@ -132,11 +129,19 @@ class OlympianMaster(olympian_master_grpc_pb2.OlympianMasterServicer):
         for i in top_k:
           print(labels[i], results[i])
 
+        print(" ")
 
+    elif ("HEARTBEAT" in request.inputs): # gRPC of heartbeats from worker
+      hb_message = tensor_util.MakeNdarray(request.inputs["HEARTBEAT"])
+      print("[%s][Master] Received heartbeat message = %s, w/ peer = %s" % (str(time.time()), str(hb_message), context.peer()))
 
-      dumbresult = predict_pb2.PredictResponse()
-      dumbresult.outputs["message"].CopyFrom(tf.contrib.util.make_tensor_proto("OK"))
-      return dumbresult
+    else:
+      print("[%s][Master] Something is wrong..." % (str(time.time())))
+
+    # default dumb OK message...
+    dumbresult = predict_pb2.PredictResponse()
+    dumbresult.outputs["message"].CopyFrom(tf.contrib.util.make_tensor_proto("OK"))
+    return dumbresult
 
 
 def main(_):

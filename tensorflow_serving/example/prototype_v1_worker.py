@@ -111,14 +111,15 @@ class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
       else:
         request_input = tensor_util.MakeNdarray(request.inputs["normalized_image"])
 
-      print("[%s][Worker] Received request using chain %s with request_input.shape = %s" % (str(time.time()), chain_name, str(request_input.shape)))
+      print("========== Predict() ==========")
+      print("[%s][Worker] Received request using chain %s w/ peer = %s, request_input.shape = %s" % (str(time.time()), chain_name, str(context.peer()), str(request_input.shape)))
 
       route_table = tensor_util.MakeNdarray(request.inputs["route_table"])
       # self.printRouteTable(str(route_table), "Worker")
 
       current_model, next_stub = self.getStubInfo(str(route_table), FLAGS.worker)
       print("[%s][Worker] current_model = %s" % (time.time(), current_model))
-      print("                        next_stub = %s\n" % (next_stub))
+      print("                        next_stub = %s" % (next_stub))
 
 
 
@@ -133,8 +134,9 @@ class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
         internal_result = self.istub.Predict(internal_request, 10.0)
 
         internal_result_value = tensor_util.MakeNdarray(internal_result.outputs["normalized_image"])
-        print(internal_result_value.shape)
+        # print("%s\n" % str(internal_result_value.shape))
         # print(internal_result_value[0, 90:95, 205, :])
+        print("[%s][Worker] Received internal result, ready for next_stub %s\n" % (str(time.time()), next_stub))
 
         next_request = predict_pb2.PredictRequest()
         next_request.model_spec.name = chain_name
@@ -158,7 +160,8 @@ class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
         internal_result = self.istub.Predict(internal_request, 10.0)
 
         internal_result_value = tensor_util.MakeNdarray(internal_result.outputs["scores"])
-        print(internal_result_value.shape)
+        # print("%s\n" % str(internal_result_value.shape))
+        print("[%s][Worker] Received internal result, ready for next_stub %s\n" % (str(time.time()), next_stub))
 
         next_request = predict_pb2.PredictRequest()
         next_request.model_spec.name = chain_name
