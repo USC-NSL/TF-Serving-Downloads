@@ -51,6 +51,102 @@ tf.app.flags.DEFINE_string('worker', 'localhost:50100',
                            'Olympian worker host:port')
 FLAGS = tf.app.flags.FLAGS
 
+# from chain_modules.chain_mobilenet import MobilenetPreprocess
+class MobilenetPreprocess():
+  def Setup(self, chain_name, route_table, current_model, next_stub, request, istub, cstub):
+    self.chain_name = chain_name
+    self.route_table = route_table
+    self.current_model = current_model
+    self.next_stub = next_stub
+    self.request = request
+    self.request_input = tensor_util.MakeNdarray(self.request.inputs["input"])
+    self.istub = istub
+    self.cstub = cstub
+
+    return
+
+  def PreProcess(self):
+    print("========== Predict() ==========")
+    print("[%s][Worker] Received request using chain %s w/ request_input.shape = %s" % (str(time.time()), self.chain_name, str(self.request_input.shape)))
+    print("[%s][Worker] current_model = %s" % (time.time(), self.current_model))
+    print("                        next_stub = %s" % (self.next_stub))
+
+    self.internal_request = predict_pb2.PredictRequest()
+    self.internal_request.model_spec.name = "exported_mobilenet_v1_1.0_224_preprocess"
+    self.internal_request.model_spec.signature_name = 'predict_images'
+
+    self.internal_request.inputs['input_image_name'].CopyFrom(
+      tf.contrib.util.make_tensor_proto(self.request_input))
+
+    return
+
+  def Apply(self):
+    self.internal_result = self.istub.Predict(self.internal_request, 10.0)
+    return
+
+  def PostProcess(self):
+    internal_result_value = tensor_util.MakeNdarray(self.internal_result.outputs["normalized_image"])
+    print("[%s][Worker] Received internal result, ready for next_stub %s\n" % (str(time.time()), self.next_stub))
+        
+    next_request = predict_pb2.PredictRequest()
+    next_request.model_spec.name = self.chain_name
+    next_request.model_spec.signature_name = "chain_specification"
+
+    next_request.inputs['normalized_image'].CopyFrom(
+      tf.contrib.util.make_tensor_proto(internal_result_value, shape=[1, 224, 224, 3]))
+    next_request.inputs['route_table'].CopyFrom(
+      tf.contrib.util.make_tensor_proto(str(self.route_table)))
+
+    next_result = self.cstub.Predict(next_request, 10.0)
+
+    return
+
+class MobilenetInference():
+  def Setup(self, chain_name, route_table, current_model, next_stub, request, istub, cstub):
+    self.chain_name = chain_name
+    self.route_table = route_table
+    self.current_model = current_model
+    self.next_stub = next_stub
+    self.request = request
+    self.request_input = tensor_util.MakeNdarray(self.request.inputs["normalized_image"])
+    self.istub = istub
+    self.cstub = cstub
+
+    return
+
+  def PreProcess(self):
+    print("========== Predict() ==========")
+    print("[%s][Worker] Received request using chain %s w/ request_input.shape = %s" % (str(time.time()), self.chain_name, str(self.request_input.shape)))
+    print("[%s][Worker] current_model = %s" % (time.time(), self.current_model))
+    print("                        next_stub = %s" % (self.next_stub))
+
+    self.internal_request = predict_pb2.PredictRequest()
+    self.internal_request.model_spec.name = "exported_mobilenet_v1_1.0_224_inference"
+    self.internal_request.model_spec.signature_name = 'predict_images'
+        
+    self.internal_request.inputs['normalized_image'].CopyFrom(
+      tf.contrib.util.make_tensor_proto(self.request_input, shape=[1, 224, 224, 3]))
+
+    return
+
+  def Apply(self):
+    self.internal_result = self.istub.Predict(self.internal_request, 10.0)
+    return
+
+  def PostProcess(self):
+    internal_result_value = tensor_util.MakeNdarray(self.internal_result.outputs["scores"])
+    print("[%s][Worker] Received internal result, ready for next_stub %s\n" % (str(time.time()), self.next_stub))
+    next_request = predict_pb2.PredictRequest()
+    next_request.model_spec.name = self.chain_name
+    next_request.model_spec.signature_name = "chain_specification"
+
+    next_request.inputs['FINAL'].CopyFrom(
+      tf.contrib.util.make_tensor_proto(internal_result_value, shape=[1, 5]))
+
+    next_result = self.cstub.Predict(next_request, 10.0)
+        
+    return
+
 # Worker Class
 class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
 
@@ -118,93 +214,29 @@ class OlympianWorker(olympian_worker_grpc_pb2.OlympianWorkerServicer):
     for i in range(len(tmp)):
       print("[%s][%s] route info: hop-%s %s" % (str(time.time()), machine_name, str(i).zfill(2), tmp[i]))
 
-  # def load_labels(self):
-  #   label_file = ("/home/yitao/Documents/fun-project/tensorflow-related/tensorflow-for-poets-2/tf_files/retrained_labels.txt")
-  #   label = []
-  #   proto_as_ascii_lines = tf.gfile.GFile(label_file).readlines()
-  #   for l in proto_as_ascii_lines:
-  #     label.append(l.rstrip())
-  #   return label
-
   def Predict(self, request, context):
     if (request.model_spec.signature_name == "chain_specification"): # gRPC from client
+
       chain_name = request.model_spec.name
-
-      if ("input" in request.inputs):
-        request_input = tensor_util.MakeNdarray(request.inputs["input"])
-      else:
-        request_input = tensor_util.MakeNdarray(request.inputs["normalized_image"])
-
-      print("========== Predict() ==========")
-      print("[%s][Worker] Received request using chain %s w/ peer = %s, request_input.shape = %s" % (str(time.time()), chain_name, str(context.peer()), str(request_input.shape)))
-
       route_table = tensor_util.MakeNdarray(request.inputs["route_table"])
-      # self.printRouteTable(str(route_table), "Worker")
-
       current_model, next_stub = self.getStubInfo(str(route_table), FLAGS.worker)
-      print("[%s][Worker] current_model = %s" % (time.time(), current_model))
-      print("                        next_stub = %s" % (next_stub))
-
-
 
       if (current_model == "exported_mobilenet_v1_1.0_224_preprocess"):
-        internal_request = predict_pb2.PredictRequest()
-        internal_request.model_spec.name = "exported_mobilenet_v1_1.0_224_preprocess"
-        internal_request.model_spec.signature_name = 'predict_images'
-
-        internal_request.inputs['input_image_name'].CopyFrom(
-          tf.contrib.util.make_tensor_proto(request_input))
-
-        internal_result = self.istub.Predict(internal_request, 10.0)
-
-        internal_result_value = tensor_util.MakeNdarray(internal_result.outputs["normalized_image"])
-        # print("%s\n" % str(internal_result_value.shape))
-        # print(internal_result_value[0, 90:95, 205, :])
-        print("[%s][Worker] Received internal result, ready for next_stub %s\n" % (str(time.time()), next_stub))
-
-        next_request = predict_pb2.PredictRequest()
-        next_request.model_spec.name = chain_name
-        next_request.model_spec.signature_name = "chain_specification"
-
-        next_request.inputs['normalized_image'].CopyFrom(
-          tf.contrib.util.make_tensor_proto(internal_result_value, shape=[1, 224, 224, 3]))
-        next_request.inputs['route_table'].CopyFrom(
-        tf.contrib.util.make_tensor_proto(str(route_table)))
-
-        next_result = self.cstubs[next_stub].Predict(next_request, 10.0)
+        mobilenetpreprocess = MobilenetPreprocess()
+        mobilenetpreprocess.Setup(chain_name, route_table, current_model, next_stub, request, self.istub, self.cstubs[next_stub])
+        mobilenetpreprocess.PreProcess()
+        mobilenetpreprocess.Apply()
+        mobilenetpreprocess.PostProcess()
 
       elif (current_model == "exported_mobilenet_v1_1.0_224_inference"):
-        internal_request = predict_pb2.PredictRequest()
-        internal_request.model_spec.name = "exported_mobilenet_v1_1.0_224_inference"
-        internal_request.model_spec.signature_name = 'predict_images'
+        mobilenetinference = MobilenetInference()
+        mobilenetinference.Setup(chain_name, route_table, current_model, next_stub, request, self.istub, self.cstubs[next_stub])
+        mobilenetinference.PreProcess()
+        mobilenetinference.Apply()
+        mobilenetinference.PostProcess()
 
-        internal_request.inputs['normalized_image'].CopyFrom(
-          tf.contrib.util.make_tensor_proto(request_input, shape=[1, 224, 224, 3]))
-
-        internal_result = self.istub.Predict(internal_request, 10.0)
-
-        internal_result_value = tensor_util.MakeNdarray(internal_result.outputs["scores"])
-        # print("%s\n" % str(internal_result_value.shape))
-        print("[%s][Worker] Received internal result, ready for next_stub %s\n" % (str(time.time()), next_stub))
-
-        next_request = predict_pb2.PredictRequest()
-        next_request.model_spec.name = chain_name
-        next_request.model_spec.signature_name = "chain_specification"
-
-        next_request.inputs['FINAL'].CopyFrom(
-          tf.contrib.util.make_tensor_proto(internal_result_value, shape=[1, 5]))
-
-        next_result = self.cstubs[next_stub].Predict(next_request, 10.0)
-
-        # labels = self.load_labels()
-        # results = np.squeeze(internal_result_value)
-        # top_k = results.argsort()[-5:][::-1]
-        # for i in top_k:
-        #   print(labels[i], results[i])
-
-
-
-
+      else:
+        print("[Worker] Error...")
 
       dumbresult = predict_pb2.PredictResponse()
       dumbresult.outputs["message"].CopyFrom(tf.contrib.util.make_tensor_proto("OK"))

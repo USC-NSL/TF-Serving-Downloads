@@ -1,8 +1,8 @@
 prototype-v1-Mobilenet
 bazel-bin/tensorflow_serving/model_servers/tensorflow_model_server --port=9000 --model_config_file=tfserv.conf.mobilenet
+bazel-bin/tensorflow_serving/example/prototype_v1_master
 bazel-bin/tensorflow_serving/example/prototype_v1_worker --worker localhost:50101
 bazel-bin/tensorflow_serving/example/prototype_v1_worker --worker localhost:50102
-bazel-bin/tensorflow_serving/example/prototype_v1_master
 bazel-bin/tensorflow_serving/example/prototype_v1_client
 
 activity detection
